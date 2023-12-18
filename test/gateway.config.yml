@@ -1,0 +1,157 @@
+http: # remove http section in production environmennt
+  port: 8080
+https:
+  port: 4444
+  tls:
+    default: # replace with real certificate in prod environment
+      key: "config/testServer.key"
+      cert: "config/testServer.crt"
+admin:
+  port: 9876
+  host: localhost
+apiEndpoints:
+  api:
+    # all matching paths should be specified including any template
+    # params as used in the ooapi spec
+    paths:
+       - '/'
+       - '/academic-sessions'
+       - '/academic-sessions/:academicSessionId'
+       - '/academic-sessions/:academicSessionId/offerings'
+       - '/associations/:associationId'
+       - '/buildings'
+       - '/buildings/:buildingId'
+       - '/components/:componentId'
+       - '/components/:componentId/offerings'
+       - '/courses'
+       - '/courses/:courseId'
+       - '/courses/:courseId/components'
+       - '/courses/:courseId/offerings'
+       - '/news-feeds'
+       - '/news-feeds/:newsFeedId'
+       - '/news-feeds/:newsFeedId/news-items'
+       - '/news-items/:newsItemId'
+       - '/offerings/:offeringId'
+       - '/offerings/:offeringId/associations'
+       - '/organizations'
+       - '/organizations/:organizationId'
+       - '/organizations/:organizationId/components'
+       - '/organizations/:organizationId/courses'
+       - '/organizations/:organizationId/programs'
+       - '/persons'
+       - '/persons/:personId'
+       - '/persons/:personId/associations'
+       - '/programs'
+       - '/programs/:programId'
+       - '/programs/:programId/courses'
+       - '/programs/:programId/offerings'
+       - '/rooms'
+       - '/rooms/:roomId'
+serviceEndpoints:
+  Basic.Auth.Backend:
+    url: https://example.com/test-backend
+    notes: 'Fred <3 Wilma'
+    proxyOptionsEncoded: "f9f15ce098d6431fd710864a12136bc5:EV1KB2Vc8AG6DCva8UFHjuesu2gd/In3kJ19PSpOEAiUi+hXBg+FvDK2Kfn2NbSS"
+  Oauth-2.Backend:
+    url: https://example.com/other-test-backend
+    proxyOptionsEncoded: "62cf55f1c2221576f6c3e6b14e661289:WDz6Liw0VcHTmYCwLNz372FqvLRG/rbDFFAJ99V4EZoOlNsgCMNZwuZST0/ja6z0rRiOmyVbld5E4YTKh7nHoAF+K8jvA/2J7lLLS7IID7+iU8IvUnNCxx7BoMut5yuHTR8QO05v8N3Y1gcUiiDRhsfwuOZyqi6Rf+KZjCthcmdvAvaILZnqloLouziy7S03gCZCQcHtXtCb2cy7EvyT8BMDda1B7VdYZc7LQXx/gGeQu8tynRdTSSjXdjur5HsL"
+  Api.Key.Backend:
+    url: https://example.com/api-key-backend
+    proxyOptionsEncoded: "8db1d2171c9e5e5dd4f9cb53426a0dbb:gvyIKh4t4eGtkoI0IW18rfTZ6PiMF14aJFKoIydVvnH2mdM0q1AncQvR4waaOVSosPUWZmOPoDgC9vMF1XUuUg=="
+
+policies:
+  - basic-auth
+  - cors
+  - expression
+  - key-auth
+  - log
+  - oauth2
+  - proxy
+  - rate-limit
+  - openapi-validator
+  - gatekeeper
+  - request-transformer
+  - response-transformer
+  - aggregation
+pipelines:
+  test:
+    apiEndpoints:
+      - api
+    policies:
+      - log:
+          - action:
+              message: ${req.egContext.requestID} ${req.method} ${req.originalUrl}
+
+      - rate-limit:
+          - action:
+              max: ${RATE_LIMIT_MAX:-10}
+              windowMs: ${RATE_LIMIT_WINDOW_MS:-1000}
+              delayAfter: ${RATE_LIMIT_DELAY_AFTER:-5}
+              delayMs: ${RATE_LIMIT_DELAY_MS:-500}
+
+      - gatekeeper:
+          - action:
+              acls:
+                # The tests depend on this being sorted by app name
+                - app: barney
+                  endpoints:
+                    - endpoint: Basic.Auth.Backend
+                      paths: ['/', '/courses', '/courses/:courseId']
+                    - endpoint: Oauth-2.Backend
+                      paths: ['/']
+                    - endpoint: Api.Key.Backend
+                      paths: ['/']
+                - app: fred
+                  endpoints:
+                    - endpoint: Basic.Auth.Backend
+                      paths: ['/', '/courses', '/courses/:courseId']
+                    - endpoint: Oauth-2.Backend
+                      paths: ['/', '/courses', '/courses/:courseId']
+                - app: pebbles
+                  endpoints:
+                    - endpoint: Api.Key.Backend
+                      paths: ['/']
+              apps:
+                fred:
+                  passwordSalt: "8b52795e90b598eb022647f17c93ac2b"
+                  passwordHash: "e4c9628c52aead0dcf10330a6864d8bcc78a5a4a463b274bee39cee4cfc0a574"
+                barney:
+                  passwordSalt: "5e5b3fb149fdd06ba9d18edd178d77cb"
+                  passwordHash: "19d767b82ebb294e3c2008b53a0bcc59140e688baded13eea1794099c869e89f"
+                pebbles:
+                  notes: 'Pebbles <3 Bamm-Bamm'
+                  passwordSalt: "5970ad7d7501916274cf114f68d2aed0"
+                  passwordHash: "5e063ba6dcff4b7bc0234be7861dac8c4dd7db573f36755e0578b2e77a5cf6bf"
+
+      - response-transformer:
+          - action:
+              headers:
+                add:
+                  # note: literal header values should be quoted twice
+                  # see https://www.express-gateway.io/docs/policies/response-transformer/
+                  'X-XSS-Protection': "'1; mode-block'"
+                  'Strict-Transport-Security': "'max-age=31536000; includeSubDomains; preload'"
+                  'X-Frame-Options': "'SAMEORIGIN'"
+                  'X-Content-Type-Options': "'nosniff'"
+                  # note: double escaping because of YAML parsing
+                  'Content-Security-Policy': "'default-src \\'self\\''"
+                  'Access-Control-Allow-Origin': "'*.surf.nl'"
+                  'Referrer-Policy': "'no-referrer-when-downgrade'"
+
+      - openapi-validator:
+          - action:
+              apiSpec: 'ooapiv4.json'
+              validateRequests: true
+              validateResponses: true
+
+      - aggregation:
+          - action:
+              noEnvelopIfAnyHeaders:
+                'X-Validate-Response': 'true'
+              keepRequestHeaders:
+                - 'accept-language'
+                - 'accept'
+                - 'x-validate-response' # needed for resp validation
+              keepResponseHeaders:
+                - 'content-type'
+                - 'content-length'
