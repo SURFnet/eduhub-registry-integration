@@ -52,7 +52,7 @@
      :pipeline    "test"})
 
   (def yaml-contents
-    (load-config "test/gateway.config.yml")))
+    (load-gateway-config "test/gateway.config.yml")))
 
 
 (defn load-gateway-config
@@ -95,8 +95,8 @@
        first))
 
 (defn- ->acl
-  [{:strs [connections endpoints] :as config} {:strs [_id name]}]
-  {"app"       name
+  [{:strs [connections endpoints] :as config} {:strs [_id credentials]}]
+  {"app"       (get-in credentials [0 "username"])
    "endpoints" (keep (fn [{application-id "application"
                            endpoint-id    "endpoint"
                            paths          "acl"}]
@@ -110,7 +110,7 @@
   [_]
   "1.2.3.4")
 
-(defn update-gatway-config
+(defn update-gateway-config
   "Update the `gateway-config` with configuration from `registry-data`.
 
   Returns the updated gateway configuration."
@@ -128,10 +128,10 @@
 
       (klist/update-in ["pipelines" pipeline "policies" "gatekeeper"]
                        klist/assoc-in ["action" "apps"]
-                       (reduce (fn [apps {:strs [name] :as app-config}]
-                                 (assoc apps name (-> app-config
-                                                      (get "credentials")
-                                                      first ;; NOTE: credentials is a collection
-                                                      (select-keys ["passwordHash" "passwordSalt"]))))
+                       (reduce (fn [apps {:strs [credentials] :as app-config}]
+                                 (assoc apps (get-in credentials [0 "username"])
+                                        (-> credentials
+                                            first
+                                            (select-keys ["passwordHash" "passwordSalt"]))))
                                {}
                                applications))))

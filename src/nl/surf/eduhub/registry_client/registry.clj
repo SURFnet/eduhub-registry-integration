@@ -2,20 +2,21 @@
   (:require [clj-http.client :as http]))
 
 (defn bearer-token
-  [{:keys [token-url client-id client-secret]}]
-  (get-in (http/request {:url          token-url
-                         :query-params {"grant_type"    "client_credentials"
-                                        "client_id"     client-id
-                                        "client_secret" client-secret}
+  [{:keys [conext-token-url conext-client-id conext-client-secret]}]
+  {:pre [conext-token-url conext-client-id conext-client-secret]}
+  (get-in (http/request {:url          conext-token-url
+                         :form-params {"grant_type"    "client_credentials"
+                                       "client_id"     conext-client-id
+                                       "client_secret" conext-client-secret}
                          :accept       :json
                          :as           :json-string-keys
-                         :method       :get})
-          [:body :access_token]))
+                         :method       :post})
+          [:body "access_token"]))
 
 (defn registry-request
-  [{:keys [base-url service-id] :as config} path]
+  [{:keys [registry-base-url registry-service-id] :as config} path]
   {:headers {"Authorization" (str "Bearer " (bearer-token config))}
-   :url     (str base-url "/services/" service-id path)
+   :url     (str registry-base-url "/services/" registry-service-id path)
    :accept  :json
    :as      :json-string-keys
    :method  :get})
@@ -23,7 +24,7 @@
 (defn get-version
   [config]
   (get-in (http/request (registry-request config "/configversion"))
-          [:body :version]))
+          [:body "version"]))
 
 (defn get-config
   [config version]

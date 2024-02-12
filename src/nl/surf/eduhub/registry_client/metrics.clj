@@ -1,14 +1,19 @@
 (ns nl.surf.eduhub.registry-client.metrics
-  (:require [iapetos.standalone :as standalone]
-            [iapetos.registry :as registry]
-            [iapetos.collector.jvm :as jvm]
-            [iapetos.core :as iapetos]))
+  (:require [steffan-westcott.clj-otel.api.metrics.instrument :as instrument]))
 
-(defonce registry
-  (-> (iapetos/collector-registry)
-      (jvm/initialize)))
+(def loop-count
+  (instrument/instrument {:name "registry_client.poll"
+                          :instrument-type :counter}))
 
-(defn start-metric-server
-  []
-  (standalone/metrics-server registry
-                             {:port 8081}))
+(def update-count
+  (instrument/instrument {:name "registry_client.update"
+                          :instrument-type :counter}))
+
+(defn inc!
+  ([counter attributes]
+   (instrument/add! counter {:value 1 :attributes attributes}))
+  ([counter]
+   (instrument/add! counter {:value 1})))
+
+(comment
+  (inc! update-count {:foo :bar}))
