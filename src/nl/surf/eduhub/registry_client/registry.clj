@@ -1,5 +1,7 @@
 (ns nl.surf.eduhub.registry-client.registry
-  (:require [clj-http.client :as http]))
+  (:require [clj-http.client :as http]
+            [nl.surf.eduhub.registry-client.registry.encryption :as encryption]
+            [cheshire.core :as json]))
 
 (defn bearer-token
   [{:keys [conext-token-url conext-client-id conext-client-secret]}]
@@ -26,6 +28,17 @@
   (get-in (http/request (registry-request config "/configversion"))
           [:body "version"]))
 
+(defn decrypt-endpoints
+  [endpoints private-key]
+  (->> endpoints
+       (mapv (fn [endpoint]
+               (if (map? (get endpoint "authentication")) ;; FIXME: When no authentication is provided, this is a vector!
+                 (update endpoint "authentication" encryption/decrypt-map private-key)
+                 endpoint)))))
+
 (defn get-config
+  "Fetch decrypted configuration with given version from the registry."
   [config version]
-  (:body (http/request (registry-request config (str "/configfile/" version)))))
+  (let [private-key (encryption/private-key config)]
+    (-> (:body (http/request (registry-request config (str "/configfile/" version))))
+        (update "endpoints" decrypt-endpoints private-key))))

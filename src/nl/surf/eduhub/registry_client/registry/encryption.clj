@@ -1,22 +1,29 @@
 (ns nl.surf.eduhub.registry-client.registry.encryption
-  (:import java.security.PrivateKey
-           java.security.KeyFactory
-           java.security.spec.PKCS8EncodedKeySpec
-           java.nio.file.Files
-           java.nio.file.FileSystems))
+  (:require [cheshire.core :as json]
+            [buddy.core.keys :as keys]
+            [buddy.core.codecs.base64 :as base64]
+            [clojure.java.io :as io])
+  (:import javax.crypto.Cipher
+           java.io.ByteArrayInputStream))
 
-(defn- read-bytes
-  "Reads content of file at `path` as a byte-array.
+(defn decrypt-payload
+  "Decrypts payloads encrypted using nodejs's crypto.publicEncrypt() method."
+  [^bytes payload ^java.security.PrivateKey k]
+  (let [cipher (Cipher/getInstance "RSA/ECB/OAEPWithSHA1AndMGF1Padding")]
+    (.init cipher Cipher/DECRYPT_MODE k)
+    (String. (.doFinal cipher payload))))
 
-  Should not be used on large files."
-  [path]
-  (let [p (-> (FileSystems/getDefault)
-              (.getPath path (make-array String 0)))]
-    (Files/readAllBytes p)))
+(defn decrypt-map
+  "Decrypts \"encryptedData\" in map.
 
-(defn ^PrivateKey read-private-key
-  "Reads a private RSA key from a .der file at `der-path`."
-  [der-path]
-  (let [kf (KeyFactory/getInstance "RSA")
-        keyspec (PKCS8EncodedKeySpec. (read-bytes der-path))]
-    (.generatePrivate kf keyspec)))
+  If m has an \"encryptedData\" map, decrypt its values and merge the
+  attributes."
+  [{:strs [encryptedData] :as m} ^java.security.PrivateKey private-key]
+  (reduce-kv (fn [m k v]
+               (assoc m k (decrypt-payload (base64/decode v) private-key)))
+             (dissoc m "encryptedData")
+             encryptedData))
+
+(defn private-key
+  [{:keys [private-key-file private-key-passphrase]}]
+  (keys/private-key (io/reader (io/file private-key-file)) private-key-passphrase))
