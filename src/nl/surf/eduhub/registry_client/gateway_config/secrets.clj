@@ -71,4 +71,4 @@
   "Decrypt (using `key`) and JSON parse `data`, return `nil` when `data` is `nil`."
   [^String key, ^String data]
   (when-not (nil? data)
-    (json/read-str (decrypt key data) :key-fn keyword)))
+    (json/read-str (decrypt key data) :key-fn identity)))

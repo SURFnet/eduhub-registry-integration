@@ -36,9 +36,21 @@
                  (update endpoint "authentication" encryption/decrypt-map private-key)
                  endpoint)))))
 
+(defn fixup-credentials
+  "In older versions of the registry, application credentials are vectors. This ensures
+  credentials are always maps."
+  [applications]
+  (map (fn [application]
+         (update application "credentials" (fn [c]
+                      (if (vector? c)
+                        (first c)
+                        c))))
+       applications))
+
 (defn get-config
   "Fetch decrypted configuration with given version from the registry."
   [config version]
   (let [private-key (encryption/private-key config)]
     (-> (:body (http/request (registry-request config (str "/configfile/" version))))
-        (update "endpoints" decrypt-endpoints private-key))))
+        (update "endpoints" decrypt-endpoints private-key)
+        (update "applications" fixup-credentials))))
