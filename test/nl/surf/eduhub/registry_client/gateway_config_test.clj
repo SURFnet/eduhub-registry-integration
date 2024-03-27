@@ -238,78 +238,78 @@
          {"noEnvelopIfAnyHeaders" {"X-Validate-Response" "true"}}}]}]}}})
 
 (deftest update-gateway-config
-  (is (= {"http" {"port" 8080},
-           "apiEndpoints" {"api" {"paths" ["/"]}},
-           "serviceEndpoints"
-           {"65c0f9e63b29378e2cc422b0"
-            {"url" "https://demo04.test.surfeduhub.nl",
-             "proxyOptions" nil},
-            "65c0f9af3b29378e2cc4229e"
-            {"url" "https://demo06.test.surfeduhub.nl",
-             "proxyOptions" {"auth" "demo:demo"}},
-            "65c0fa3f3b29378e2cc422b8"
-            {"url" "https://demo05.test.surfeduhub.nl",
-             "proxyOptions" {"headers" {"Authorisation" "Bearer 12345"}}},
-            "65c4cfe728d04541474f51e8"
-            {"url" "https://hotmail.surf.nl",
-             "proxyOptions"
-             {"oauth2"
-              {"clientCredentials"
-               {"tokenEndpoint"
-                {"url" "https://connect.test.surfconext.nl",
-                 "params"
-                 {"grant_type" "client_credentials",
-                  "client_id" "dummy-client-id",
-                  "client_secret" "dummy-password"}}}}}}},
-           "policies" ["log" "gatekeeper" "aggregation"],
-           "pipelines"
-           {"test"
-            {"apiEndpoints" ["api"],
-             "policies"
-             [{"log" [{"action" "dummy"}]}
-              {"rate-limit" [{"action" "dummy"}]}
-              {"gatekeeper"
-               [{"action"
-                 {"acls"
-                  [{"app" "app1",
-                    "endpoints"
-                    [{"endpoint" "65c0f9e63b29378e2cc422b0",
-                      "paths"
-                      ["/courses/{courseId}"
-                       "/courses/{courseId}/offerings"
-                       "/education-specifications/{educationSpecificationId}"
-                       "/programs/{programId}"
-                       "/programs/{programId}/offerings"]}
-                     {"endpoint" "65c0f9af3b29378e2cc4229e",
-                      "paths"
-                      ["/courses/{courseId}"
-                       "/courses/{courseId}/offerings"
-                       "/education-specifications/{educationSpecificationId}"
-                       "/programs/{programId}"
-                       "/programs/{programId}/offerings"]}]}
-                   {"app" "app2",
-                    "endpoints"
-                    [{"endpoint" "65c0f9e63b29378e2cc422b0",
-                      "paths"
-                      ["/persons"
-                       "/persons/{personId}"
-                       "/associations/{associationId}"
-                       "/associations/external/me"]}
-                     {"endpoint" "65c0fa3f3b29378e2cc422b8",
-                      "paths"
-                      ["/persons"
-                       "/persons/{personId}"
-                       "/associations/{associationId}"
-                       "/associations/external/me"]}]}],
-                  "apps"
-                  {"app1" {"passwordHash" "hash1", "passwordSalt" "salt1"},
-                   "app2" {"passwordHash" "hash2", "passwordSalt" "salt2"}}}}]}
-              {"aggregation"
-               [{"action"
-                 {"noEnvelopIfAnyHeaders" {"X-Validate-Response" "true"}}}]}],
-             "version" "12345"}}}
-         (->> (sut/update-gateway-config {:secrets-key "0123456789abcdef0123456789abcdef0123456789abcdef"
-                                         :pipeline    "test"}
+  (is (= {"http"         {"port" 8080},
+          "apiEndpoints" {"api" {"paths" ["/"]}},
+          "serviceEndpoints"
+          {"65c0f9e63b29378e2cc422b0"
+           {"url"          "https://demo04.test.surfeduhub.nl",
+            "proxyOptions" nil},
+           "65c0f9af3b29378e2cc4229e"
+           {"url"          "https://demo06.test.surfeduhub.nl",
+            "proxyOptions" {"auth" "demo:demo"}},
+           "65c0fa3f3b29378e2cc422b8"
+           {"url"          "https://demo05.test.surfeduhub.nl",
+            "proxyOptions" {"headers" {"Authorisation" "Bearer 12345"}}},
+           "65c4cfe728d04541474f51e8"
+           {"url" "https://hotmail.surf.nl",
+            "proxyOptions"
+            {"oauth2"
+             {"clientCredentials"
+              {"tokenEndpoint"
+               {"url" "https://connect.test.surfconext.nl",
+                "params"
+                {"grant_type"    "client_credentials",
+                 "client_id"     "dummy-client-id",
+                 "client_secret" "dummy-password"}}}}}}},
+          "policies"     ["log" "gatekeeper" "aggregation"],
+          "pipelines"
+          {"test"
+           {"apiEndpoints" ["api"],
+            "policies"
+            [{"log" [{"action" "dummy"}]}
+             {"rate-limit" [{"action" "dummy"}]}
+             {"gatekeeper"
+              [{"action"
+                {"acls"
+                 [{"app" "app1",
+                   "endpoints"
+                   [{"endpoint" "65c0f9e63b29378e2cc422b0",
+                     "paths"
+                     ["/courses/{courseId}"
+                      "/courses/{courseId}/offerings"
+                      "/education-specifications/{educationSpecificationId}"
+                      "/programs/{programId}"
+                      "/programs/{programId}/offerings"]}
+                    {"endpoint" "65c0f9af3b29378e2cc4229e",
+                     "paths"
+                     ["/courses/{courseId}"
+                      "/courses/{courseId}/offerings"
+                      "/education-specifications/{educationSpecificationId}"
+                      "/programs/{programId}"
+                      "/programs/{programId}/offerings"]}]}
+                  {"app" "app2",
+                   "endpoints"
+                   [{"endpoint" "65c0f9e63b29378e2cc422b0",
+                     "paths"
+                     ["/persons"
+                      "/persons/{personId}"
+                      "/associations/{associationId}"
+                      "/associations/external/me"]}
+                    {"endpoint" "65c0fa3f3b29378e2cc422b8",
+                     "paths"
+                     ["/persons"
+                      "/persons/{personId}"
+                      "/associations/{associationId}"
+                      "/associations/external/me"]}]}],
+                 "apps"
+                 {"app1" {"passwordHash" "hash1", "passwordSalt" "salt1"},
+                  "app2" {"passwordHash" "hash2", "passwordSalt" "salt2"}}}}]}
+             {"aggregation"
+              [{"action"
+                {"noEnvelopIfAnyHeaders" {"X-Validate-Response" "true"}}}]}],
+            "version"      "12345"}}}
+         (->> (sut/update-gateway-config {:gateway-secrets-key "0123456789abcdef0123456789abcdef0123456789abcdef"
+                                          :gateway-pipeline    "test"}
                                         gateway-config
                                         registry-data)
               (decode-proxy-options secrets-key)))))

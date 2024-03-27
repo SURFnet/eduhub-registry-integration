@@ -6,15 +6,17 @@
 
 (defn load-gateway-config
   [f]
+  {:pre [f]}
   (with-open [stream (io/input-stream f)
               reader (io/reader stream)]
     (yaml/parse-stream reader {:keywords false}))) ;; yes, parse-stream takes a reader, not a stream
 
 (defn write-gateway-config
   [f gateway-config]
+  {:pre [f gateway-config]}
   (with-open [stream (io/output-stream f)
               writer (io/writer stream)]
-    (yaml/generate-stream writer gateway-config)))
+    (yaml/generate-stream writer gateway-config :dumper-options {:flow-style :block})))
 
 (defmulti authentication->proxy-options
   (fn [options {:strs [type]}] type))
@@ -37,6 +39,10 @@
             "params" {"grant_type"    "client_credentials"
                       "client_id"     clientId
                       "client_secret" clientSecret}}}}))
+
+(defmethod authentication->proxy-options "none"
+  [options _]
+  options)
 
 (defn ->proxy-options
   ;; Endpoint configuration is already decrypted in
@@ -81,10 +87,6 @@
                           "paths"    paths}))
                      connections)})
 
-(defn version
-  [_]
-  "1.2.3.4")
-
 (defn ->acls
   [applications connections]
   (mapv #(->acl connections %) applications))
@@ -106,22 +108,27 @@
                     (select-keys ["passwordHash" "passwordSalt"]))]))
         applications))
 
+
+(defn version
+  [{:keys [gateway-pipeline]} gateway-config]
+  (klist/get-in gateway-config ["pipelines" gateway-pipeline "version"]))
+
 (defn update-gateway-config
   "Update the `gateway-config` with configuration from `registry-data`.
 
   Returns the updated gateway configuration."
-  [{:keys [secrets-key pipeline]}
+  [{:keys [gateway-secrets-key gateway-pipeline]}
    gateway-config
    {:strs [connections applications endpoints version] :as registry-data}]
   (-> gateway-config
-      (assoc "serviceEndpoints" (->service-endpoints secrets-key endpoints))
+      (assoc "serviceEndpoints" (->service-endpoints gateway-secrets-key endpoints))
 
-      (klist/assoc-in ["pipelines" pipeline "version"] version)
+      (klist/assoc-in ["pipelines" gateway-pipeline "version"] version)
 
-      (klist/update-in ["pipelines" pipeline "policies" "gatekeeper"]
+      (klist/update-in ["pipelines" gateway-pipeline "policies" "gatekeeper"]
                        klist/assoc-in ["action" "acls"]
                        (->acls applications connections))
 
-      (klist/update-in ["pipelines" pipeline "policies" "gatekeeper"]
+      (klist/update-in ["pipelines" gateway-pipeline "policies" "gatekeeper"]
                        klist/assoc-in ["action" "apps"]
                        (->apps applications))))

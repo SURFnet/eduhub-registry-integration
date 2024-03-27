@@ -26,4 +26,5 @@
 
 (defn private-key
   [{:keys [private-key-file private-key-passphrase]}]
+  {:pre [private-key-file private-key-passphrase]}
   (keys/private-key (io/reader (io/file private-key-file)) private-key-passphrase))
