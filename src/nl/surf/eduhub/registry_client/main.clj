@@ -19,7 +19,8 @@
    :registry-base-url      ["Base URL for registry API"]
    :registry-service-id    ["Service ID for registry API"]
    :private-key-passphrase ["Passphrase for private key file"]
-   :private-key-file       ["Path to private key file (pem)"]})
+   :private-key-file       ["Path to private key file (pem)"]
+   :polling-interval       ["Interval in seconds between registry polls" :int :default 30]})
 
 (defn poll
   [{:keys [gateway-config-file temp-config-file] :as config}]
@@ -38,15 +39,12 @@
         (gateway-config/write-gateway-config temp-config-file new-config)
         (.renameTo (io/file temp-config-file) (io/file gateway-config-file))))))
 
-(def polling-interval-seconds
-  30)
-
 (defn poll-loop
-  [stop config]
+  [stop {:keys [polling-interval] :as config}]
   (loop []
     (when-not @stop
       (poll config)
-      (loop [c polling-interval-seconds]
+      (loop [c polling-interval]
         (when (and (pos? c)
                    (not @stop))
           (Thread/sleep 1000)
