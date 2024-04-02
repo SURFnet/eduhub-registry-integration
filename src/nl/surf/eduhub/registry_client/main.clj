@@ -5,7 +5,8 @@
             [clojure.java.io :as io]
             [nl.jomco.envopts :as envopts]
             [environ.core :refer [env]]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log])
+  (:gen-class))
 
 (def opt-specs
   {:gateway-config-file    ["Path to gateway config.yml"]
@@ -28,7 +29,7 @@
     (log/debug "Polling for configuration")
     (metrics/inc! metrics/loop-count)
     (when-not (= available-version current-config-version)
-      (log/info "New configuration version found. Old: %s, new: %" current-config-version available-version)
+      (log/infof "New configuration version found. Old: %s, new: %s" current-config-version available-version)
       (metrics/inc! metrics/update-count)
       (let [reg-config (registry/get-config config available-version)
             new-config (gateway-config/update-gateway-config config
