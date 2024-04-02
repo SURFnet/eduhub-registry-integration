@@ -35,7 +35,7 @@ make opentelemetry-javaagent.jar
 Exporting metrics can be enabled by setting up the Java opentelemetry-agent.
 
 ```
-export JAVA_OPTS="-javaagent:./opentelemetry-javaagent.jar"
+export JAVA_TOOL_OPTIONS="-javaagent:./opentelemetry-javaagent.jar"
 export OTEL_LOGS_EXPORTER=none
 export OTEL_METRICS_EXPORTER=prometheus
 export OTEL_EXPORTER_PROMETHEUS_ENDPOINT=http://localhost:9464
@@ -72,4 +72,29 @@ user=> (registry/get-config config version)
   ...}}
 user=>
 ```
+
+# Docker
+
+You can build a Docker image that contains the uberjar and the
+opentelemetry-javaagent -- see `Dockerfile`
+
+An example setup with prometheus is provided by the
+`docker-compose.yml` -- it expects the configuration in an `.envrc`.
+
+To run:
+
+```sh
+docker-compose build
+docker-compose up
+```
+
+The registry client has no UI, you can inspect metrics on the
+prometheus dashboard at http://localhost:9090/
+
+Example metrics:
+
+- [JVM memory use in last 5 minutes](http://localhost:9090/graph?g0.expr=jvm_memory_used_bytes&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=5m)
+- [Number of polls to registry](http://localhost:9090/graph?g0.expr=registry_client_poll_total&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=5m)
+- [HTTP requests to registry and SURF Conext](http://localhost:9090/graph?g0.expr=http_client_request_duration_seconds_count&g0.tab=1&g0.stacked=0&g0.show_exemplars=0&g0.range_input=5m)
+
 
