@@ -47,10 +47,20 @@
                         c))))
        applications))
 
+(defn ensure-registry-config
+  "Throw exception if `config` does not look like a valid configuration."
+  [config]
+  (doseq [k ["endpoints" "applications" "version" "connections"]]
+    (when-not (seq (get config k))
+      (throw (ex-info (str "Missing key " k " in registry response")
+                      {:missing-key k}))))
+  config)
+
 (defn get-config
   "Fetch decrypted configuration with given version from the registry."
   [config version]
   (let [private-key (encryption/private-key config)]
     (-> (:body (http/request (registry-request config (str "/configfile/" version))))
+        ensure-registry-config
         (update "endpoints" decrypt-endpoints private-key)
         (update "applications" fixup-credentials))))
