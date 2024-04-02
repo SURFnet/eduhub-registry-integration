@@ -52,7 +52,7 @@
   [config]
   (doseq [k ["endpoints" "applications" "version" "connections"]]
     (when-not (seq (get config k))
-      (throw (ex-info (str "Missing key " k " in registry response")
+      (throw (ex-info (str "Missing key \"" k "\" in registry response")
                       {:missing-key k}))))
   config)
 

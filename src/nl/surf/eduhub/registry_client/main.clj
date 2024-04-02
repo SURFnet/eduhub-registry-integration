@@ -40,34 +40,17 @@
         (.renameTo (io/file temp-config-file) (io/file gateway-config-file))))))
 
 (defn poll-loop
-  [stop {:keys [polling-interval] :as config}]
+  [stop-atom {:keys [polling-interval] :as config}]
   (loop []
-    (when-not @stop
+    (when-not @stop-atom
       (poll config)
       (loop [c polling-interval]
         (when (and (pos? c)
-                   (not @stop))
+                   (not @stop-atom))
           (Thread/sleep 1000)
           (recur (dec c))))
       (recur)))
   (log/info "Shutting down"))
-
-(defn set-thread-name!
-  [n]
-  (-> (Thread/currentThread)
-      (.setName n)))
-
-(defn start
-  [config]
-  (log/info "Starting registry-client")
-  (let [stop (atom false)
-        polling (future
-                  (set-thread-name! "poll-loop")
-                  (poll-loop stop config))]
-    (fn halt []
-      (log/info "Stopping registry-client")
-      (reset! stop true)
-      @polling)))
 
 (defn check-config
   [cfg]
@@ -77,12 +60,33 @@
           nil)
       opts)))
 
+(defn stop-atom
+  "Returns an atom containing a boolean.
+
+  Initially the atom will contain `false`. When a termination signal
+  is received, it will be reset to `true`."
+  []
+  (let [stop! (atom false)
+        stopped (promise)]
+    (-> (Runtime/getRuntime)
+        (.addShutdownHook (Thread. (fn []
+                                     (log/info "Shutdown signal received.")
+                                     (reset! stop! true)
+                                     ;; If the shutdown hook returns,
+                                     ;; the JVM is shut down immediately.
+                                     ;;
+                                     ;; That's why we must wait on
+                                     ;; `stopped` promise, so we are
+                                     ;; sure that poll-loop is done.
+                                     @stopped))))
+    [stop! stopped]))
+
 (defn -main
   [& args]
-  (set-thread-name! "main")
   (if-let [config (check-config env)]
-    (let [stop-fn (start config)]
-      (-> (Runtime/getRuntime)
-          (.addShutdownHook (Thread. (fn []
-                                       (set-thread-name! "shutdown-hook")
-                                       (stop-fn))))))))
+    (let [[stop! stopped] (stop-atom)]
+      (try (poll-loop stop! config)
+           (finally
+             (log/info "Poll loop was shut down")
+             (deliver stopped true)
+             (shutdown-agents))))))
