@@ -1,0 +1,18 @@
+name: Run tests
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      
+    - uses: actions/cache@v4
+      with: { path: "~/.m2", key: "${{ runner.os }}-${{ hashFiles('deps.edn') }}-m2" }
+      
+    - name: Install clj runtime
+      run: .github/workflows/install-binaries.sh
+      
+    - name: run tests
+      run: bin/clojure -M:test
