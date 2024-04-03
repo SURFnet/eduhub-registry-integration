@@ -6,7 +6,9 @@
             [nl.jomco.envopts :as envopts]
             [environ.core :refer [env]]
             [clojure.tools.logging :as log])
-  (:gen-class))
+  (:gen-class)
+  (:import java.nio.file.Files
+           java.nio.file.StandardCopyOption))
 
 (def opt-specs
   {:gateway-config-file    ["Path to gateway config.yml"]
@@ -21,6 +23,14 @@
    :private-key-passphrase ["Passphrase for private key file"]
    :private-key-file       ["Path to private key file (pem)"]
    :polling-interval       ["Interval in seconds between registry polls" :int :default 30]})
+
+(def atomic-move-options
+  (into-array StandardCopyOption [StandardCopyOption/REPLACE_EXISTING StandardCopyOption/ATOMIC_MOVE]))
+
+(defn rename
+  [from to]
+  (Files/move (.toPath (io/file from)) (.toPath (io/file to))
+              atomic-move-options))
 
 (defn poll
   [{:keys [gateway-config-file temp-config-file] :as config}]
@@ -37,7 +47,7 @@
                                                              current-gateway-config
                                                              reg-config)]
         (gateway-config/write-gateway-config temp-config-file new-config)
-        (.renameTo (io/file temp-config-file) (io/file gateway-config-file))))))
+        (rename temp-config-file gateway-config-file)))))
 
 (defn poll-loop
   [stop-atom {:keys [polling-interval] :as config}]
