@@ -28,6 +28,10 @@ A few metrics are collected:
 
 # Configuring metrics to prometheus
 
+```sh
+make opentelemetry-javaagent.jar
+```
+
 Exporting metrics can be enabled by setting up the Java opentelemetry-agent.
 
 ```
