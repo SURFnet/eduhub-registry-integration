@@ -44,3 +44,28 @@ export OTEL_TRACES_EXPORTER=none
 Logs are printed directly to STDOUT and can be forwarded to another
 service if needed.
 
+# Development stack
+
+You need to [install the clojure and clj
+commands](https://clojure.org/guides/install_clojure).
+
+Start a REPL. With `dev` profile this automatically requires `dev/user.clj`:
+
+```clojure
+clj -M:dev
+Picked up JAVA_TOOL_OPTIONS: -javaagent:./opentelemetry-javaagent.jar
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[otel.javaagent 2024-04-03 10:16:14:875 +0200] [main] INFO io.opentelemetry.javaagent.tooling.VersionLogger - opentelemetry-javaagent - version: 2.2.0
+Warning: environ value /usr/local/opt/openjdk/libexec/openjdk.jdk/Contents/Home for key :java-home has been overwritten with /usr/local/Cellar/openjdk/21.0.2/libexec/openjdk.jdk/Contents/Home
+Clojure 1.11.0
+user=> (registry/get-version config)
+"24.2024:03:26.14:55:42"
+user=> (registry/get-config config version)
+{"service"
+ {"_id" "65c0f8e1e3e8e723c22b094c",
+  "name" "Gateway V5 DEV sandbox",
+  "type" "gateway",
+  ...}}
+user=>
+```
+
