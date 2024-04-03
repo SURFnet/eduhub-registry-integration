@@ -2,6 +2,7 @@
   (:require [nl.jomco.klist :as klist]
             [nl.surf.eduhub.registry-client.gateway-config.secrets :as secrets]
             [clj-yaml.core :as yaml]
+            [clojure.string :as string]
             [clojure.java.io :as io]))
 
 (defn load-gateway-config
@@ -73,6 +74,11 @@
        (filter #(= id (get % "_id")))
        first))
 
+(defn- normalize-path-params
+  "Convert path params from \"/foo/{param}\" to \"/foo/:param\""
+  [p]
+  (string/replace p #"\{(.*?)\}" ":$1"))
+
 (defn- ->acl
   [connections
    {id                    "_id"
@@ -84,7 +90,7 @@
                            paths          "acl"}]
                        (when (= id application-id)
                          {"endpoint" endpoint-id
-                          "paths"    paths}))
+                          "paths"    (mapv normalize-path-params paths)}))
                      connections)})
 
 (defn ->acls

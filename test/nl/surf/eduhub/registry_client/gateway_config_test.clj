@@ -183,31 +183,31 @@
             "endpoints"
              [{"endpoint" "65c0f9e63b29378e2cc422b0",
                "paths"
-               ["/courses/{courseId}"
-                "/courses/{courseId}/offerings"
-                "/education-specifications/{educationSpecificationId}"
-                "/programs/{programId}"
-                "/programs/{programId}/offerings"]}
+               ["/courses/:courseId"
+                "/courses/:courseId/offerings"
+                "/education-specifications/:educationSpecificationId"
+                "/programs/:programId"
+                "/programs/:programId/offerings"]}
               {"endpoint" "65c0f9af3b29378e2cc4229e",
                "paths"
-               ["/courses/{courseId}"
-                "/courses/{courseId}/offerings"
-                "/education-specifications/{educationSpecificationId}"
-                "/programs/{programId}"
-                "/programs/{programId}/offerings"]}]}
+               ["/courses/:courseId"
+                "/courses/:courseId/offerings"
+                "/education-specifications/:educationSpecificationId"
+                "/programs/:programId"
+                "/programs/:programId/offerings"]}]}
            {"app" "app2",
             "endpoints"
             [{"endpoint" "65c0f9e63b29378e2cc422b0",
               "paths"
               ["/persons"
-               "/persons/{personId}"
-               "/associations/{associationId}"
+               "/persons/:personId"
+               "/associations/:associationId"
                "/associations/external/me"]}
              {"endpoint" "65c0fa3f3b29378e2cc422b8",
               "paths"
               ["/persons"
-               "/persons/{personId}"
-               "/associations/{associationId}"
+               "/persons/:personId"
+               "/associations/:associationId"
                "/associations/external/me"]}]}]
            (sut/->acls applications connections)))))
 
@@ -275,31 +275,31 @@
                    "endpoints"
                    [{"endpoint" "65c0f9e63b29378e2cc422b0",
                      "paths"
-                     ["/courses/{courseId}"
-                      "/courses/{courseId}/offerings"
-                      "/education-specifications/{educationSpecificationId}"
-                      "/programs/{programId}"
-                      "/programs/{programId}/offerings"]}
+                     ["/courses/:courseId"
+                      "/courses/:courseId/offerings"
+                      "/education-specifications/:educationSpecificationId"
+                      "/programs/:programId"
+                      "/programs/:programId/offerings"]}
                     {"endpoint" "65c0f9af3b29378e2cc4229e",
                      "paths"
-                     ["/courses/{courseId}"
-                      "/courses/{courseId}/offerings"
-                      "/education-specifications/{educationSpecificationId}"
-                      "/programs/{programId}"
-                      "/programs/{programId}/offerings"]}]}
+                     ["/courses/:courseId"
+                      "/courses/:courseId/offerings"
+                      "/education-specifications/:educationSpecificationId"
+                      "/programs/:programId"
+                      "/programs/:programId/offerings"]}]}
                   {"app" "app2",
                    "endpoints"
                    [{"endpoint" "65c0f9e63b29378e2cc422b0",
                      "paths"
                      ["/persons"
-                      "/persons/{personId}"
-                      "/associations/{associationId}"
+                      "/persons/:personId"
+                      "/associations/:associationId"
                       "/associations/external/me"]}
                     {"endpoint" "65c0fa3f3b29378e2cc422b8",
                      "paths"
                      ["/persons"
-                      "/persons/{personId}"
-                      "/associations/{associationId}"
+                      "/persons/:personId"
+                      "/associations/:associationId"
                       "/associations/external/me"]}]}],
                  "apps"
                  {"app1" {"passwordHash" "hash1", "passwordSalt" "salt1"},
