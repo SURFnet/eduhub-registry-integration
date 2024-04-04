@@ -70,6 +70,7 @@
 ;; TODO: maybe preprocess config from registry for efficient access by id
 (defn- find-by-id
   [coll id]
+  ;; MDM: If you only need the first, use `some`
   (->> coll
        (filter #(= id (get % "_id")))
        first))
@@ -93,9 +94,16 @@
                           "paths"    (mapv normalize-path-params paths)}))
                      connections)})
 
+;; MDM: Removed unnecessary O(n²)
 (defn ->acls
   [applications connections]
-  (mapv #(->acl connections %) applications))
+  (let [connections-by-app-id (group-by #(get % "application") connections)]
+    (mapv (fn [app]
+            (let [app-id (get app "_id")
+                  conns  (get connections app-id)]
+              (->acl conns app)))
+           applications)))
+
 
 (defn ->service-endpoints
   [secrets-key endpoints]

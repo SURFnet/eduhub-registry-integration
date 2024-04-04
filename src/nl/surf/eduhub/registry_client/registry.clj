@@ -3,6 +3,7 @@
             [nl.surf.eduhub.registry-client.registry.encryption :as encryption]
             [cheshire.core :as json]))
 
+;; MDM: Why :json-string-keys? Why no keywords?
 (defn bearer-token
   [{:keys [conext-token-url conext-client-id conext-client-secret]}]
   {:pre [conext-token-url conext-client-id conext-client-secret]}
@@ -32,6 +33,7 @@
   [endpoints private-key]
   (->> endpoints
        (mapv (fn [endpoint]
+               ;; MDM: Maybe use `(cond endpoint-> `?
                (if (map? (get endpoint "authentication")) ;; FIXME: When no authentication is provided, this is a vector!
                  (update endpoint "authentication" encryption/decrypt-map private-key)
                  endpoint)))))
@@ -41,12 +43,14 @@
   credentials are always maps."
   [applications]
   (map (fn [application]
-         (update application "credentials" (fn [c]
+         (update application "credentials" (fn [c])
+                      ;; MDM: Depending on whether empty vectors occur, (get c 0 c) could work.
                       (if (vector? c)
                         (first c)
-                        c))))
+                        c)))
        applications))
 
+;; MDM: Throw exception with all missing keys, instead of just the first one.
 (defn ensure-registry-config
   "Throw exception if `config` does not look like a valid configuration."
   [config]
@@ -60,6 +64,7 @@
   "Fetch decrypted configuration with given version from the registry."
   [config version]
   (let [private-key (encryption/private-key config)]
+    ;; MDM: You can thread this out a bit more
     (-> (:body (http/request (registry-request config (str "/configfile/" version))))
         ensure-registry-config
         (update "endpoints" decrypt-endpoints private-key)

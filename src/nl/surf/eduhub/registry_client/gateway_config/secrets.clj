@@ -34,6 +34,13 @@
 (def cipher-transformation "AES/CBC/PKCS5PADDING")
 (def secret-key-algo "AES")
 
+;; If you use get-cipher, you can get rid of skey and cipher in decrypt and encrypt
+(defn get-cipher [key mode iv]
+  (let [skey   (SecretKeySpec. (hex-to-bytes key) secret-key-algo)
+        cipher (Cipher/getInstance cipher-transformation)]
+    (.init cipher skey iv)
+    cipher))
+
 (defn decrypt
   "Decrypt base64 encoded `text` using `key` (192 bit hexadecimal)."
   ^String [^String key, ^String text]
@@ -64,11 +71,13 @@
 (defn encode
   "JSON encode and encrypt (using `key`) `data`, return `nil` when `data` is `nil`."
   ^String [^String key, data]
+  ;; (when data
   (when-not (nil? data)
     (->> data (json/write-str) (encrypt key))))
 
 (defn decode
   "Decrypt (using `key`) and JSON parse `data`, return `nil` when `data` is `nil`."
   [^String key, ^String data]
+  ;; (when data
   (when-not (nil? data)
     (json/read-str (decrypt key data) :key-fn identity)))
