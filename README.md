@@ -1,4 +1,9 @@
-# Configuration settings
+# SURFeduhub Registry Integration
+
+Allow configuration changes made in the SURFeduhub registry to be deployed in the [SURFeduhub gateway](https://github.com/SURFnet/eduhub-gateway).
+
+
+## Configuration settings
 
 The application is configured using the following environment
 variables, which are all mandatory.
@@ -18,7 +23,7 @@ REGISTRY_SERVICE_ID     Service ID for registry API
 TEMP_CONFIG_FILE        Path to use for temporary config.yml
 ```
 
-# Metrics
+## Metrics
 
 A few metrics are collected:
 
@@ -26,7 +31,7 @@ A few metrics are collected:
 
 `registry_client.update` counts number of updates to the gateway configuration
 
-# Configuring metrics to prometheus
+## Configuring metrics to prometheus
 
 ```sh
 make opentelemetry-javaagent.jar
@@ -43,12 +48,12 @@ export OTEL_SERVICE_NAME=gateway-registry-client
 export OTEL_TRACES_EXPORTER=none
 ```
 
-# Logging
+## Logging
 
 Logs are printed directly to STDOUT and can be forwarded to another
 service if needed.
 
-# Development stack
+## Development stack
 
 You need to [install the clojure and clj
 commands](https://clojure.org/guides/install_clojure).
@@ -72,4 +77,3 @@ user=> (registry/get-config config version)
   ...}}
 user=>
 ```
-
