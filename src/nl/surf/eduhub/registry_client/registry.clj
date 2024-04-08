@@ -1,9 +1,9 @@
 (ns nl.surf.eduhub.registry-client.registry
   (:require [clj-http.client :as http]
+            [clojure.string :as string]
             [nl.surf.eduhub.registry-client.registry.encryption :as encryption]
             [cheshire.core :as json]))
 
-;; MDM: Why :json-string-keys? Why no keywords?
 (defn bearer-token
   [{:keys [conext-token-url conext-client-id conext-client-secret]}]
   {:pre [conext-token-url conext-client-id conext-client-secret]}
@@ -43,29 +43,30 @@
   credentials are always maps."
   [applications]
   (map (fn [application]
-         (update application "credentials" (fn [c])
-                      ;; MDM: Depending on whether empty vectors occur, (get c 0 c) could work.
-                      (if (vector? c)
-                        (first c)
-                        c)))
+         (update application "credentials" (fn [c]
+                                             ;; can also be empty vectors
+                                             (if (vector? c)
+                                               (first c)
+                                               c))))
        applications))
 
 ;; MDM: Throw exception with all missing keys, instead of just the first one.
 (defn ensure-registry-config
   "Throw exception if `config` does not look like a valid configuration."
   [config]
-  (doseq [k ["endpoints" "applications" "version" "connections"]]
-    (when-not (seq (get config k))
-      (throw (ex-info (str "Missing key \"" k "\" in registry response")
-                      {:missing-key k}))))
+  (when-let [missing (seq (remove #(seq (config %)) ["endpoints" "applications" "version" "connections"]))]
+    (throw (ex-info (str "Missing keys " (string/join ", " missing) " in registry response")
+                    {:missing-keys missing})))
   config)
 
 (defn get-config
   "Fetch decrypted configuration with given version from the registry."
   [config version]
   (let [private-key (encryption/private-key config)]
-    ;; MDM: You can thread this out a bit more
-    (-> (:body (http/request (registry-request config (str "/configfile/" version))))
+    (-> config
+        (registry-request (str "/configfile/" version))
+        http/request
+        :body
         ensure-registry-config
         (update "endpoints" decrypt-endpoints private-key)
         (update "applications" fixup-credentials))))

@@ -34,11 +34,11 @@
 (def cipher-transformation "AES/CBC/PKCS5PADDING")
 (def secret-key-algo "AES")
 
-;; If you use get-cipher, you can get rid of skey and cipher in decrypt and encrypt
-(defn get-cipher [key mode iv]
-  (let [skey   (SecretKeySpec. (hex-to-bytes key) secret-key-algo)
+(defn- ->cipher [key mode iv-bytes]
+  (let [iv     (IvParameterSpec. iv-bytes)
+        skey   (SecretKeySpec. (hex-to-bytes key) secret-key-algo)
         cipher (Cipher/getInstance cipher-transformation)]
-    (.init cipher skey iv)
+    (.init cipher mode skey iv)
     cipher))
 
 (defn decrypt
@@ -46,23 +46,22 @@
   ^String [^String key, ^String text]
   {:pre [(string? key) (re-matches #"[0-9a-f]{48}" key)]}
   (let [[iv text] (string/split text #":")
-        iv        (IvParameterSpec. (hex-to-bytes iv))
-        skey      (SecretKeySpec. (hex-to-bytes key) secret-key-algo)
-        cipher    (Cipher/getInstance cipher-transformation)]
-    (.init cipher Cipher/DECRYPT_MODE skey iv)
+        cipher    (->cipher key Cipher/DECRYPT_MODE (hex-to-bytes iv))]
     (String. (.doFinal cipher (.decode (Base64/getDecoder) text))
              "UTF-8")))
+
+(defn- random-iv-bytes
+  []
+  (let [iv-bytes (byte-array 16)]
+    (.nextBytes (SecureRandom.) iv-bytes)
+    iv-bytes))
 
 (defn encrypt
   "Encode `text` using `key` (192 bit hexadecimal), returns base64 encoded blob."
   ^String [^String key, ^String text]
   {:pre [(string? key) (re-matches #"[0-9a-f]{48}" key)]}
-  (let [iv-bytes (byte-array 16)
-        _        (.nextBytes (SecureRandom.) iv-bytes)
-        iv       (IvParameterSpec. iv-bytes)
-        skey     (SecretKeySpec. (hex-to-bytes key) secret-key-algo)
-        cipher   (Cipher/getInstance cipher-transformation)]
-    (.init cipher Cipher/ENCRYPT_MODE skey iv)
+  (let [iv-bytes (random-iv-bytes)
+        cipher   (->cipher key Cipher/ENCRYPT_MODE iv-bytes)]
     (str (bytes-to-hex iv-bytes) ":"
          (String. (.encode (Base64/getEncoder)
                            (.doFinal cipher (.getBytes text "UTF-8")))
@@ -70,14 +69,13 @@
 
 (defn encode
   "JSON encode and encrypt (using `key`) `data`, return `nil` when `data` is `nil`."
-  ^String [^String key, data]
-  ;; (when data
-  (when-not (nil? data)
+  ^String [^String key, ^String data]
+  (when data
     (->> data (json/write-str) (encrypt key))))
 
 (defn decode
   "Decrypt (using `key`) and JSON parse `data`, return `nil` when `data` is `nil`."
   [^String key, ^String data]
   ;; (when data
-  (when-not (nil? data)
+  (when data
     (json/read-str (decrypt key data) :key-fn identity)))

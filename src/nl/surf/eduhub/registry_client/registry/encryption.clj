@@ -27,5 +27,7 @@
 (defn private-key
   [{:keys [private-key-file private-key-passphrase]}]
   {:pre [private-key-file private-key-passphrase]}
-  ;; use threading macro
-  (keys/private-key (io/reader (io/file private-key-file)) private-key-passphrase))
+  (-> private-key-file
+      io/file
+      io/reader
+      (keys/private-key private-key-passphrase)))
