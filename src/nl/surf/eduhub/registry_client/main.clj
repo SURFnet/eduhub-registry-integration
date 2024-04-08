@@ -34,10 +34,10 @@
 
 (defn poll
   [{:keys [gateway-config-file temp-config-file] :as config}]
+  (log/debug "Polling for configuration")
   (let [current-gateway-config (gateway-config/load-gateway-config gateway-config-file)
         current-config-version (gateway-config/version config current-gateway-config)
         available-version      (registry/get-version config)]
-    (log/debug "Polling for configuration")
     (metrics/inc! metrics/loop-count)
     (when-not (= available-version current-config-version)
       (log/infof "New configuration version found. Old: %s, new: %s" current-config-version available-version)
