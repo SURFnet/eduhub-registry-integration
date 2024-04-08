@@ -1,8 +1,8 @@
 (ns nl.surf.eduhub.registry-client.gateway-config-test
-  (:require [nl.surf.eduhub.registry-client.gateway-config :as sut]
-            [nl.surf.eduhub.registry-client.gateway-config.secrets :as secrets]
-            [clojure.test :refer [deftest testing is]]
-            [clojure.walk :as walk]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [clojure.walk :as walk]
+            [nl.surf.eduhub.registry-client.gateway-config :as sut]
+            [nl.surf.eduhub.registry-client.gateway-config.secrets :as secrets]))
 
 (def secrets-key
   "0123456789abcdef0123456789abcdef0123456789abcdef")

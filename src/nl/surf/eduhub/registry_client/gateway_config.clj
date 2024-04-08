@@ -1,9 +1,9 @@
 (ns nl.surf.eduhub.registry-client.gateway-config
-  (:require [nl.jomco.klist :as klist]
-            [nl.surf.eduhub.registry-client.gateway-config.secrets :as secrets]
-            [clj-yaml.core :as yaml]
+  (:require [clj-yaml.core :as yaml]
+            [clojure.java.io :as io]
             [clojure.string :as string]
-            [clojure.java.io :as io]))
+            [nl.jomco.klist :as klist]
+            [nl.surf.eduhub.registry-client.gateway-config.secrets :as secrets]))
 
 (defn load-gateway-config
   [f]
@@ -20,7 +20,7 @@
     (yaml/generate-stream writer gateway-config :dumper-options {:flow-style :block})))
 
 (defmulti authentication->proxy-options
-  (fn [options {:strs [type]}] type))
+  (fn [_options {:strs [type]}] type))
 
 (defmethod authentication->proxy-options "basic"
   [options {:strs [username password]}]
@@ -32,7 +32,7 @@
   (assoc-in options ["headers" name] value))
 
 (defmethod authentication->proxy-options "oauth2-client-credentials"
-  [options {:strs [service tokenUrl clientId clientSecret]}]
+  [options {:strs [tokenUrl clientId clientSecret]}]
   (assoc options "oauth2" ;; service?
          {"clientCredentials"
           {"tokenEndpoint"
@@ -64,13 +64,8 @@
 
 (defn ->service-endpoint
   [secrets-key {:strs [url] :as config}]
-  {"url" url
+  {"url"                 url
    "proxyOptionsEncoded" (secrets/encode secrets-key (->proxy-options config))})
-
-;; TODO: maybe preprocess config from registry for efficient access by id
-(defn- find-by-id
-  [coll id]
-  (some #(= id (get % "_id")) coll))
 
 (defn- normalize-path-params
   "Convert path params from \"/foo/{param}\" to \"/foo/:param\""
@@ -80,7 +75,7 @@
 (defn- ->acl
   [connections
    {id                    "_id"
-    {app-name "username"} "credentials" :as application}]
+    {app-name "username"} "credentials"}]
   {:pre [id app-name connections]}
   {"app"       app-name
    "endpoints" (keep (fn [{application-id "application"
@@ -109,7 +104,7 @@
 (defn ->apps
   [applications]
   (into {}
-        (map (fn [{:strs [credentials] :as app-config}]
+        (map (fn [{:strs [credentials]}]
                [(get credentials "username")
                 (-> credentials
                     (select-keys ["passwordHash" "passwordSalt"]))]))
@@ -126,7 +121,7 @@
   Returns the updated gateway configuration."
   [{:keys [gateway-secrets-key gateway-pipeline]}
    gateway-config
-   {:strs [connections applications endpoints version] :as registry-data}]
+   {:strs [connections applications endpoints version]}]
   (-> gateway-config
       (assoc "serviceEndpoints" (->service-endpoints gateway-secrets-key endpoints))
 

@@ -1,14 +1,13 @@
 (ns nl.surf.eduhub.registry-client.main
-  (:require [nl.surf.eduhub.registry-client.gateway-config :as gateway-config]
-            [nl.surf.eduhub.registry-client.registry :as registry]
-            [nl.surf.eduhub.registry-client.metrics :as metrics]
-            [clojure.java.io :as io]
-            [nl.jomco.envopts :as envopts]
-            [environ.core :refer [env]]
-            [clojure.tools.logging :as log])
   (:gen-class)
-  (:import java.nio.file.Files
-           java.nio.file.StandardCopyOption))
+  (:require [clojure.java.io :as io]
+            [clojure.tools.logging :as log]
+            [environ.core :refer [env]]
+            [nl.jomco.envopts :as envopts]
+            [nl.surf.eduhub.registry-client.gateway-config :as gateway-config]
+            [nl.surf.eduhub.registry-client.metrics :as metrics]
+            [nl.surf.eduhub.registry-client.registry :as registry])
+  (:import (java.nio.file Files StandardCopyOption)))
 
 (def opt-specs
   {:gateway-config-file    ["Path to gateway config.yml"]
@@ -92,8 +91,8 @@
     [stop! stopped]))
 
 (defn -main
-  [& args]
-  (if-let [config (check-config env)]
+  [& _]
+  (when-let [config (check-config env)]
     (let [[stop! stopped] (stop-atom)]
       (try (poll-loop stop! config)
            (finally

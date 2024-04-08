@@ -1,12 +1,12 @@
 (ns nl.surf.eduhub.registry-client.registry
   (:require [clj-http.client :as http]
             [clojure.string :as string]
-            [nl.surf.eduhub.registry-client.registry.encryption :as encryption]
-            [cheshire.core :as json]))
+            [nl.surf.eduhub.registry-client.registry.encryption :as encryption]))
 
 (defn bearer-token
   [{:keys [conext-token-url conext-client-id conext-client-secret]}]
   {:pre [conext-token-url conext-client-id conext-client-secret]}
+  ;; TODO cache token
   (get-in (http/request {:url          conext-token-url
                          :form-params {"grant_type"    "client_credentials"
                                        "client_id"     conext-client-id
