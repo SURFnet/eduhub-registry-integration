@@ -12,3 +12,11 @@ clean:
 
 opentelemetry-javaagent.jar:
 	curl -L https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -o $@
+
+.PHONY: docker-build test
+
+test:
+	clj -M:test
+
+docker-build: Dockerfile docker-compose.yml opentelemetry-javaagent.jar
+	docker-compose build
