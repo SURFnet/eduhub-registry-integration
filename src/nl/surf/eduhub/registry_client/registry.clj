@@ -33,7 +33,7 @@
   [endpoints private-key]
   (->> endpoints
        (mapv (fn [endpoint]
-               ;; MDM: Maybe use `(cond endpoint-> `?
+               ;; Maybe use `(cond endpoint-> `?
                (if (map? (get endpoint "authentication")) ;; FIXME: When no authentication is provided, this is a vector!
                  (update endpoint "authentication" encryption/decrypt-map private-key)
                  endpoint)))))
@@ -50,7 +50,6 @@
                                                c))))
        applications))
 
-;; MDM: Throw exception with all missing keys, instead of just the first one.
 (defn ensure-registry-config
   "Throw exception if `config` does not look like a valid configuration."
   [config]
