@@ -35,7 +35,7 @@
        (mapv (fn [endpoint]
                ;; Maybe use `(cond endpoint-> `?
                (if (map? (get endpoint "authentication")) ;; FIXME: When no authentication is provided, this is a vector!
-                 (update endpoint "authentication" encryption/decrypt-map private-key)
+                 (update endpoint "authentication" encryption/merge-encrypted-data private-key)
                  endpoint)))))
 
 (defn fixup-credentials

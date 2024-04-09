@@ -8,7 +8,7 @@
 ;; Compatible with nodejs's crypto.publicEncrypt() method
 (def cipher-transformation "RSA/ECB/OAEPWithSHA1AndMGF1Padding")
 
-(defn decrypt-payload
+(defn- decrypt-payload
   "Decrypts payloads encrypted using nodejs's crypto.publicEncrypt() method."
   [^bytes payload ^PrivateKey k]
   (let [cipher (Cipher/getInstance cipher-transformation)]
@@ -18,11 +18,12 @@
 (defn- base64-decode [text]
   (.decode (Base64/getDecoder) text))
 
-(defn decrypt-map
+(defn merge-encrypted-data
   "Decrypts \"encryptedData\" in map.
 
   If m has an \"encryptedData\" map, decrypt its values and merge the
-  attributes."
+  attributes.  The original \"encryptedData\" entries will be
+  removed."
   [{:strs [encryptedData] :as m} ^PrivateKey private-key]
   (reduce-kv (fn [m k v]
                (assoc m k (decrypt-payload (base64-decode v) private-key)))
