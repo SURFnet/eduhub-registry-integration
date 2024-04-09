@@ -8,13 +8,13 @@
   "0123456789abcdef0123456789abcdef0123456789abcdef")
 
 (def endpoints
-  [{"_id"            "65c0f9e63b29378e2cc422b0",
+  [{"_id"            "endpoint-1",
     "url"            "https://demo04.test.surfeduhub.nl",
     "timeout"        10,
     "ooapi"          {"version" "5"},
     "headers"        [],
     "authentication" []}
-   {"_id"     "65c0f9af3b29378e2cc4229e",
+   {"_id"     "endpoint-2",
     "url"     "https://demo06.test.surfeduhub.nl",
     "timeout" 1000,
     "ooapi"   {"version" "5"},
@@ -23,7 +23,7 @@
     {"username" "demo",
      "type"     "basic",
      "password" "demo"}}
-   {"_id"            "65c0fa3f3b29378e2cc422b8",
+   {"_id"            "endpoint-3",
     "url"            "https://demo05.test.surfeduhub.nl",
     "timeout"        0,
     "ooapi"          {"version" "5"},
@@ -31,7 +31,7 @@
     "authentication" {"type"  "header"
                       "name"  "Authorisation"
                       "value" "Bearer 12345"}}
-   {"_id"     "65c4cfe728d04541474f51e8",
+   {"_id"     "endpoint-4",
     "url"     "https://hotmail.surf.nl",
     "timeout" 0,
     "ooapi"   {"version" "5"},
@@ -43,7 +43,7 @@
      "clientSecret" "dummy-password"}}])
 
 (def applications
-  [{"_id"   "65c4d7d428d04541474f52a3",
+  [{"_id"   "application-1",
     "name"  "RIO mapper",
     "ooapi" {"version" "5"},
     "credentials"
@@ -51,7 +51,7 @@
      "username"     "app1",
      "passwordHash" "hash1",
      "passwordSalt" "salt1"}}
-   {"_id"   "65c4da3f28d04541474f52d5",
+   {"_id"   "application-2",
     "name"  "edubroker",
     "ooapi" {"version" "5"},
     "credentials"
@@ -60,11 +60,13 @@
      "passwordHash" "hash2",
      "passwordSalt" "salt2"}}])
 
+(def service-id service-id)
+
 (def connections
-  [{"_id"         "65c4d7d4789e7efdc1f716ab",
-    "service"     "65c0f8e1e3e8e723c22b094c",
-    "endpoint"    "65c0f9e63b29378e2cc422b0",
-    "application" "65c4d7d428d04541474f52a3",
+  [{"_id"         "connection-1",
+    "service"     service-id,
+    "endpoint"    "endpoint-1",
+    "application" "application-1",
     "name"        1,
     "createdAt"   "2024-02-08T13:32:04.927Z",
     "acl"
@@ -73,10 +75,10 @@
      "/education-specifications/{educationSpecificationId}"
      "/programs/{programId}"
      "/programs/{programId}/offerings"]}
-   {"_id"         "65c4da3f789e7efdc1f716ad",
-    "service"     "65c0f8e1e3e8e723c22b094c",
-    "endpoint"    "65c0f9e63b29378e2cc422b0",
-    "application" "65c4da3f28d04541474f52d5",
+   {"_id"         "connection-2",
+    "service"     service-id,
+    "endpoint"    "endpoint-1",
+    "application" "application-2",
     "name"        2,
     "createdAt"   "2024-02-08T13:42:23.814Z",
     "acl"
@@ -84,10 +86,10 @@
      "/persons/{personId}"
      "/associations/{associationId}"
      "/associations/external/me"]}
-   {"_id"         "65c4e031789e7efdc1f716af",
-    "service"     "65c0f8e1e3e8e723c22b094c",
-    "endpoint"    "65c0f9af3b29378e2cc4229e",
-    "application" "65c4d7d428d04541474f52a3",
+   {"_id"         "connection-3",
+    "service"     service-id,
+    "endpoint"    "endpoint-2",
+    "application" "application-1",
     "name"        3,
     "createdAt"   "2024-02-08T14:07:45.574Z",
     "acl"
@@ -96,10 +98,10 @@
      "/education-specifications/{educationSpecificationId}"
      "/programs/{programId}"
      "/programs/{programId}/offerings"]}
-   {"_id"         "65c4e0dc789e7efdc1f716b1",
-    "service"     "65c0f8e1e3e8e723c22b094c",
-    "endpoint"    "65c0fa3f3b29378e2cc422b8",
-    "application" "65c4da3f28d04541474f52d5",
+   {"_id"         "connection-4",
+    "service"     service-id,
+    "endpoint"    "endpoint-3",
+    "application" "application-2",
     "name"        4,
     "createdAt"   "2024-02-08T14:10:36.615Z",
     "acl"
@@ -107,10 +109,10 @@
      "/persons/{personId}"
      "/associations/{associationId}"
      "/associations/external/me"]}
-   {"_id"         "65c5e531789e7efdc1f716c0",
-    "service"     "65c0f8e1e3e8e723c22b094c",
-    "endpoint"    "65c4cfe728d04541474f51e8",
-    "application" "65c4d4f628d04541474f51ff",
+   {"_id"         "connection-5",
+    "service"     service-id,
+    "endpoint"    "endpoint-4",
+    "application" "application-does-not-exist", ;; TODO: write test for effect
     "name"        5,
     "createdAt"   "2024-02-09T08:41:21.227Z",
     "acl"
@@ -143,15 +145,15 @@
 (deftest conversions
   (testing "serviceEndpoints"
     (is (=
-         {"65c0f9e63b29378e2cc422b0"
+         {"endpoint-1"
           {"url" "https://demo04.test.surfeduhub.nl", "proxyOptions" nil},
-          "65c0f9af3b29378e2cc4229e"
+          "endpoint-2"
           {"url"          "https://demo06.test.surfeduhub.nl",
            "proxyOptions" {"auth" "demo:demo"}},
-          "65c0fa3f3b29378e2cc422b8"
+          "endpoint-3"
           {"url"          "https://demo05.test.surfeduhub.nl",
            "proxyOptions" {"headers" {"Authorisation" "Bearer 12345"}}},
-          "65c4cfe728d04541474f51e8"
+          "endpoint-4"
           {"url" "https://hotmail.surf.nl",
            "proxyOptions"
            {"oauth2"
@@ -181,14 +183,14 @@
   (testing "acls"
     (is (= [{"app" "app1",
             "endpoints"
-             [{"endpoint" "65c0f9e63b29378e2cc422b0",
+             [{"endpoint" "endpoint-1",
                "paths"
                ["/courses/:courseId"
                 "/courses/:courseId/offerings"
                 "/education-specifications/:educationSpecificationId"
                 "/programs/:programId"
                 "/programs/:programId/offerings"]}
-              {"endpoint" "65c0f9af3b29378e2cc4229e",
+              {"endpoint" "endpoint-2",
                "paths"
                ["/courses/:courseId"
                 "/courses/:courseId/offerings"
@@ -197,13 +199,13 @@
                 "/programs/:programId/offerings"]}]}
            {"app" "app2",
             "endpoints"
-            [{"endpoint" "65c0f9e63b29378e2cc422b0",
+            [{"endpoint" "endpoint-1",
               "paths"
               ["/persons"
                "/persons/:personId"
                "/associations/:associationId"
                "/associations/external/me"]}
-             {"endpoint" "65c0fa3f3b29378e2cc422b8",
+             {"endpoint" "endpoint-3",
               "paths"
               ["/persons"
                "/persons/:personId"
@@ -241,16 +243,16 @@
   (is (= {"http"         {"port" 8080},
           "apiEndpoints" {"api" {"paths" ["/"]}},
           "serviceEndpoints"
-          {"65c0f9e63b29378e2cc422b0"
+          {"endpoint-1"
            {"url"          "https://demo04.test.surfeduhub.nl",
             "proxyOptions" nil},
-           "65c0f9af3b29378e2cc4229e"
+           "endpoint-2"
            {"url"          "https://demo06.test.surfeduhub.nl",
             "proxyOptions" {"auth" "demo:demo"}},
-           "65c0fa3f3b29378e2cc422b8"
+           "endpoint-3"
            {"url"          "https://demo05.test.surfeduhub.nl",
             "proxyOptions" {"headers" {"Authorisation" "Bearer 12345"}}},
-           "65c4cfe728d04541474f51e8"
+           "endpoint-4"
            {"url" "https://hotmail.surf.nl",
             "proxyOptions"
             {"oauth2"
@@ -273,14 +275,14 @@
                 {"acls"
                  [{"app" "app1",
                    "endpoints"
-                   [{"endpoint" "65c0f9e63b29378e2cc422b0",
+                   [{"endpoint" "endpoint-1",
                      "paths"
                      ["/courses/:courseId"
                       "/courses/:courseId/offerings"
                       "/education-specifications/:educationSpecificationId"
                       "/programs/:programId"
                       "/programs/:programId/offerings"]}
-                    {"endpoint" "65c0f9af3b29378e2cc4229e",
+                    {"endpoint" "endpoint-2",
                      "paths"
                      ["/courses/:courseId"
                       "/courses/:courseId/offerings"
@@ -289,13 +291,13 @@
                       "/programs/:programId/offerings"]}]}
                   {"app" "app2",
                    "endpoints"
-                   [{"endpoint" "65c0f9e63b29378e2cc422b0",
+                   [{"endpoint" "endpoint-1",
                      "paths"
                      ["/persons"
                       "/persons/:personId"
                       "/associations/:associationId"
                       "/associations/external/me"]}
-                    {"endpoint" "65c0fa3f3b29378e2cc422b8",
+                    {"endpoint" "endpoint-3",
                      "paths"
                      ["/persons"
                       "/persons/:personId"
@@ -308,7 +310,7 @@
               [{"action"
                 {"noEnvelopIfAnyHeaders" {"X-Validate-Response" "true"}}}]}],
             "version"      "12345"}}}
-         (->> (sut/update-gateway-config {:gateway-secrets-key "0123456789abcdef0123456789abcdef0123456789abcdef"
+         (->> (sut/update-gateway-config {:gateway-secrets-key secrets-key
                                           :gateway-pipeline    "test"}
                                         gateway-config
                                         registry-data)

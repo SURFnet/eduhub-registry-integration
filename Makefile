@@ -1,3 +1,5 @@
+.PHONY: lint test check clean
+
 default: target/eduhub-registry-client.jar
 
 classes/nl/surf/eduhub/registry_client/main.class: src/nl/surf/eduhub/registry_client/main.clj
@@ -8,7 +10,12 @@ target/eduhub-registry-client.jar: classes/nl/surf/eduhub/registry_client/main.c
 	clojure -M:uberjar --main-class nl.surf.eduhub.registry_client.main
 
 lint:
-	clojure -Sdeps '{:deps {this/project {:local/root "."} clj-kondo/clj-kondo {:mvn/version "RELEASE"}}}' -M -m clj-kondo.main --lint src test
+	clojure -M:lint
+
+test:
+	clojure -M:test
+
+check: lint test
 
 clean:
 	rm -rf classes target
