@@ -1,26 +1,31 @@
 (ns nl.surf.eduhub.registry-client.registry.encryption
-  (:require [cheshire.core :as json]
-            [buddy.core.keys :as keys]
-            [buddy.core.codecs.base64 :as base64]
+  (:require [buddy.core.keys :as keys]
             [clojure.java.io :as io])
-  (:import javax.crypto.Cipher
-           java.io.ByteArrayInputStream))
+  (:import (java.security PrivateKey)
+           (java.util Base64)
+           (javax.crypto Cipher)))
+
+;; Compatible with nodejs's crypto.publicEncrypt() method
+(def cipher-transformation "RSA/ECB/OAEPWithSHA1AndMGF1Padding")
 
 (defn decrypt-payload
   "Decrypts payloads encrypted using nodejs's crypto.publicEncrypt() method."
-  [^bytes payload ^java.security.PrivateKey k]
-  (let [cipher (Cipher/getInstance "RSA/ECB/OAEPWithSHA1AndMGF1Padding")]
+  [^bytes payload ^PrivateKey k]
+  (let [cipher (Cipher/getInstance cipher-transformation)]
     (.init cipher Cipher/DECRYPT_MODE k)
     (String. (.doFinal cipher payload))))
+
+(defn- base64-decode [text]
+  (.decode (Base64/getDecoder) text))
 
 (defn decrypt-map
   "Decrypts \"encryptedData\" in map.
 
   If m has an \"encryptedData\" map, decrypt its values and merge the
   attributes."
-  [{:strs [encryptedData] :as m} ^java.security.PrivateKey private-key]
+  [{:strs [encryptedData] :as m} ^PrivateKey private-key]
   (reduce-kv (fn [m k v]
-               (assoc m k (decrypt-payload (base64/decode v) private-key)))
+               (assoc m k (decrypt-payload (base64-decode v) private-key)))
              (dissoc m "encryptedData")
              encryptedData))
 
