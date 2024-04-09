@@ -50,7 +50,7 @@
                                                c))))
        applications))
 
-(defn ensure-registry-config
+(defn guard-registry-config
   "Throw exception if `config` does not look like a valid configuration."
   [config]
   (when-let [missing (seq (remove #(seq (config %)) ["endpoints" "applications" "version" "connections"]))]
@@ -66,6 +66,6 @@
         (registry-request (str "/configfile/" version))
         http/request
         :body
-        ensure-registry-config
+        guard-registry-config
         (update "endpoints" decrypt-endpoints private-key)
         (update "applications" fixup-credentials))))
