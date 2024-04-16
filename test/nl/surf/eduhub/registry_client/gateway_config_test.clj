@@ -13,7 +13,7 @@
     "timeout"        10,
     "ooapi"          {"version" "5"},
     "headers"        [],
-    "authentication" []}
+    "authentication" {"type" "none"}}
    {"_id"     "endpoint-2",
     "url"     "https://demo06.test.surfeduhub.nl",
     "timeout" 1000,
@@ -41,6 +41,23 @@
      "tokenUrl"     "https://connect.test.surfconext.nl",
      "type"         "oauth2-client-credentials",
      "clientSecret" "dummy-password"}}])
+
+(deftest proxy-options
+  (is
+   (= [{"proxyTimeout" 10}
+       {"proxyTimeout" 1000,
+        "auth"         "demo:demo"}
+       {"proxyTimeout" 0,
+        "headers"      {"Authorisation" "Bearer 12345"}}
+       {"proxyTimeout" 0,
+        "oauth2"       {"clientCredentials"
+                        {"tokenEndpoint"
+                         {"url"    "https://connect.test.surfconext.nl",
+                          "params" {"grant_type"    "client_credentials",
+                                    "client_id"     "dummy-client-id",
+                                    "client_secret" "dummy-password"}}}}}]
+      (mapv sut/->proxy-options
+            endpoints))))
 
 (def applications
   [{"_id"   "application-1",
@@ -146,13 +163,16 @@
   (testing "serviceEndpoints"
     (is (=
          {"endpoint-1"
-          {"url" "https://demo04.test.surfeduhub.nl", "proxyOptions" nil},
+          {"url"          "https://demo04.test.surfeduhub.nl",
+           "proxyOptions" {"proxyTimeout" 10}},
           "endpoint-2"
           {"url"          "https://demo06.test.surfeduhub.nl",
-           "proxyOptions" {"auth" "demo:demo"}},
+           "proxyOptions" {"auth"         "demo:demo"
+                           "proxyTimeout" 1000}},
           "endpoint-3"
           {"url"          "https://demo05.test.surfeduhub.nl",
-           "proxyOptions" {"headers" {"Authorisation" "Bearer 12345"}}},
+           "proxyOptions" {"headers"      {"Authorisation" "Bearer 12345"}
+                           "proxyTimeout" 0}},
           "endpoint-4"
           {"url" "https://hotmail.surf.nl",
            "proxyOptions"
@@ -163,7 +183,8 @@
                "params"
                {"grant_type"    "client_credentials",
                 "client_id"     "dummy-client-id",
-                "client_secret" "dummy-password"}}}}}}}
+                "client_secret" "dummy-password"}}}}
+            "proxyTimeout" 0}}}
 
          (->> endpoints
               (sut/->service-endpoints secrets-key)
@@ -182,7 +203,7 @@
 
   (testing "acls"
     (is (= [{"app" "app1",
-            "endpoints"
+             "endpoints"
              [{"endpoint" "endpoint-1",
                "paths"
                ["/courses/:courseId"
@@ -197,20 +218,20 @@
                 "/education-specifications/:educationSpecificationId"
                 "/programs/:programId"
                 "/programs/:programId/offerings"]}]}
-           {"app" "app2",
-            "endpoints"
-            [{"endpoint" "endpoint-1",
-              "paths"
-              ["/persons"
-               "/persons/:personId"
-               "/associations/:associationId"
-               "/associations/external/me"]}
-             {"endpoint" "endpoint-3",
-              "paths"
-              ["/persons"
-               "/persons/:personId"
-               "/associations/:associationId"
-               "/associations/external/me"]}]}]
+            {"app" "app2",
+             "endpoints"
+             [{"endpoint" "endpoint-1",
+               "paths"
+               ["/persons"
+                "/persons/:personId"
+                "/associations/:associationId"
+                "/associations/external/me"]}
+              {"endpoint" "endpoint-3",
+               "paths"
+               ["/persons"
+                "/persons/:personId"
+                "/associations/:associationId"
+                "/associations/external/me"]}]}]
            (sut/->acls applications connections)))))
 
 (def gateway-config
@@ -245,13 +266,15 @@
           "serviceEndpoints"
           {"endpoint-1"
            {"url"          "https://demo04.test.surfeduhub.nl",
-            "proxyOptions" nil},
+            "proxyOptions" {"proxyTimeout" 10}},
            "endpoint-2"
            {"url"          "https://demo06.test.surfeduhub.nl",
-            "proxyOptions" {"auth" "demo:demo"}},
+            "proxyOptions" {"auth"         "demo:demo"
+                            "proxyTimeout" 1000}},
            "endpoint-3"
            {"url"          "https://demo05.test.surfeduhub.nl",
-            "proxyOptions" {"headers" {"Authorisation" "Bearer 12345"}}},
+            "proxyOptions" {"headers"      {"Authorisation" "Bearer 12345"}
+                            "proxyTimeout" 0}},
            "endpoint-4"
            {"url" "https://hotmail.surf.nl",
             "proxyOptions"
@@ -262,7 +285,8 @@
                 "params"
                 {"grant_type"    "client_credentials",
                  "client_id"     "dummy-client-id",
-                 "client_secret" "dummy-password"}}}}}}},
+                 "client_secret" "dummy-password"}}}}
+             "proxyTimeout" 0}}},
           "policies"     ["log" "gatekeeper" "aggregation"],
           "pipelines"
           {"test"

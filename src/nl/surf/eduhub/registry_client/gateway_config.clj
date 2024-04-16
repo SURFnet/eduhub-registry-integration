@@ -26,7 +26,6 @@
   [options {:strs [username password]}]
   (assoc options "auth" (str username ":" password)))
 
-
 (defmethod authentication->proxy-options "header"
   [options {:strs [name value]}]
   (assoc-in options ["headers" name] value))
@@ -41,7 +40,7 @@
                       "client_id"     clientId
                       "client_secret" clientSecret}}}}))
 
-(defmethod authentication->proxy-options "none" ;; TODO: write tests for this case
+(defmethod authentication->proxy-options "none"
   [options _]
   options)
 
@@ -51,9 +50,9 @@
   [{:strs [authentication headers timeout]}]
   (cond-> {}
     timeout
-    {"proxyTimeout" timeout} ;; TODO: write tests for this case
+    (assoc "proxyTimeout" timeout)
 
-    (seq headers) ;; TODO: write tests for this case
+    (seq headers)
     (assoc "headers" (into {}
                            (map (fn [{:strs [name value]}]
                                   [name value]))
