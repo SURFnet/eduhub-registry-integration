@@ -1,0 +1,27 @@
+#
+# This configuration will run everything except the 
+
+version: "3.9"
+services:
+  
+#
+# Prometheus will be scraping metrics.
+#
+# Goto http://localhost:9090/ to view the prometheus dashboard.
+#
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./dev-infra/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  registry-client:
+    build: .
+    env_file:
+      - .envrc # read environment from local direnv settings
+    volumes:
+      - ./shared:/shared # writeable directory where gateway.config.yml is kept
+      - ./private_key.pem:/private_key.pem
+
