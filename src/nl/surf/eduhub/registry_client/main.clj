@@ -1,6 +1,7 @@
 (ns nl.surf.eduhub.registry-client.main
   (:gen-class)
   (:require [clojure.java.io :as io]
+            [clojure.string :as string]
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [nl.jomco.envopts :as envopts]
@@ -31,6 +32,10 @@
   (Files/move (.toPath (io/file from)) (.toPath (io/file to))
               atomic-move-options))
 
+(defn safe-name
+  [s]
+  (string/replace s #"[^a-zA-Z0-9]+" "_"))
+
 (defn poll
   [{:keys [gateway-config-file temp-config-file] :as config}]
   (log/debug "Polling for configuration")
@@ -45,7 +50,12 @@
             new-config (gateway-config/update-gateway-config config
                                                              current-gateway-config
                                                              reg-config)]
+        ;; backup current configuration
+        (io/copy (io/file gateway-config-file)
+                 (io/file (str gateway-config-file "." (safe-name current-config-version))))
+        ;; write new version to temp file
         (gateway-config/write-gateway-config temp-config-file new-config)
+        ;; atomically replace current file with new configuration
         (rename temp-config-file gateway-config-file)))))
 
 (defn poll-loop
