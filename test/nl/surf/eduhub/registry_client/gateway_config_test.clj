@@ -129,7 +129,7 @@
    {"_id"         "connection-5",
     "service"     service-id,
     "endpoint"    "endpoint-4",
-    "application" "application-does-not-exist", ;; TODO: write test for effect
+    "application" "application-does-not-exist",
     "name"        5,
     "createdAt"   "2024-02-09T08:41:21.227Z",
     "acl"
