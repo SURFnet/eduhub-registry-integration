@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2024 SURF B.V.
+# SPDX-FileContributor: Joost Diepenmaat
+#
+# SPDX-License-Identifier: Apache-2.0
+
 FROM clojure:temurin-21-tools-deps-1.11.1.1435 as builder
 
 RUN mkdir /app

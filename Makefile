@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2024 SURF B.V.
+# SPDX-FileContributor: Joost Diepenmaat
+# SPDX-FileContributor: Remco van 't Veer
+#
+# SPDX-License-Identifier: Apache-2.0
+
 .PHONY: lint test check clean
 
 default: target/eduhub-registry-client.jar

@@ -1,6 +1,14 @@
+<!--
+SPDX-FileCopyrightText: 2024 SURF B.V.
+SPDX-FileContributor: Joost Diepenmaat
+SPDX-FileContributor: Remco van 't Veer
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # SURFeduhub Registry Integration
 
-Allow configuration changes made in the SURFeduhub registry to be deployed in the [SURFeduhub gateway](https://github.com/SURFnet/eduhub-gateway).
+Allow configuration changes made in the SURFeduhub registry to be deployed in the [SURFeduhub gateway](https://github.com/SURF/eduhub-gateway).
 
 
 ## Configuration settings
@@ -101,3 +109,9 @@ Example metrics:
 - [JVM memory use in last 5 minutes](http://localhost:9090/graph?g0.expr=jvm_memory_used_bytes&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=5m)
 - [Number of polls to registry](http://localhost:9090/graph?g0.expr=registry_client_poll_total&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=5m)
 - [HTTP requests to registry and SURF Conext](http://localhost:9090/graph?g0.expr=http_client_request_duration_seconds_count&g0.tab=1&g0.stacked=0&g0.show_exemplars=0&g0.range_input=5m)
+
+# Copying
+
+Copyright (C) 2024 SURF B.V.
+
+[Apache-2.0](LICENSES/Apache-2.0.txt)

@@ -1,3 +1,9 @@
+;;; SPDX-FileCopyrightText: 2024 SURF B.V.
+;;; SPDX-FileContributor: Joost Diepenmaat
+;;; SPDX-FileContributor: Remco van 't Veer
+;;;
+;;; SPDX-License-Identifier: Apache-2.0
+
 (ns nl.surf.eduhub.registry-client.registry.encryption
   (:require [buddy.core.keys :as keys]
             [clojure.java.io :as io])

@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2024 SURF B.V.
+# SPDX-FileContributor: Joost Diepenmaat
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Install clojure and babashka to `./bin` and `./lib`
 
 set -ex

@@ -1,3 +1,8 @@
+;;; SPDX-FileCopyrightText: 2024 SURF B.V.
+;;; SPDX-FileContributor: Joost Diepenmaat
+;;;
+;;; SPDX-License-Identifier: Apache-2.0
+
 (ns nl.surf.eduhub.registry-client.metrics
   (:require [steffan-westcott.clj-otel.api.metrics.instrument :as instrument]))
 
