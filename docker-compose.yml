@@ -24,6 +24,9 @@ services:
 
   registry-client:
     build: .
+    ports:
+      - "9464:9464"
+
     env_file:
       - .envrc # read environment from local direnv settings
     volumes:

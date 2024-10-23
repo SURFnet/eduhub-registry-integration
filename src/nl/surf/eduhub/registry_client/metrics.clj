@@ -8,7 +8,9 @@
 
 (def loop-count
   (instrument/instrument {:name "registry_client.poll"
-                          :instrument-type :counter}))
+                          :instrument-type :counter
+                          :unit "{loops}"
+                          :description "Number main loops"}))
 
 (def update-count
   (instrument/instrument {:name "registry_client.update"
