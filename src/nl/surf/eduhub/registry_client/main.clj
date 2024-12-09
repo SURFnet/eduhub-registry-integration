@@ -58,8 +58,10 @@
                                                              reg-config)]
         ;; backup current configuration
         (io/copy (io/file gateway-config-file)
-                 (io/file (str gateway-config-file "." (safe-name current-config-version))))
-        ;; write new version to temp file
+                 (io/file (str gateway-config-file "." (if current-config-version
+                                                         (safe-name current-config-version)
+                                                         "initial"))))
+        ;; write new version to temp file]
         (gateway-config/write-gateway-config temp-config-file new-config)
         ;; atomically replace current file with new configuration
         (rename temp-config-file gateway-config-file)))))
