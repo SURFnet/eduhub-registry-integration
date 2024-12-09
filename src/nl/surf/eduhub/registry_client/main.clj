@@ -14,7 +14,8 @@
             [nl.surf.eduhub.registry-client.gateway-config :as gateway-config]
             [nl.surf.eduhub.registry-client.metrics :as metrics]
             [nl.surf.eduhub.registry-client.registry :as registry])
-  (:import (java.nio.file Files StandardCopyOption)))
+  (:import (java.nio.file Files StandardCopyOption)
+           (java.net ConnectException)))
 
 (def opt-specs
   {:gateway-config-file    ["Path to gateway config.yml"]
@@ -68,7 +69,9 @@
   [stop-atom {:keys [polling-interval] :as config}]
   (loop []
     (when-not @stop-atom
-      (poll config)
+      (try (poll config)
+           (catch ConnectException e
+             (log/error e "Error connecting to remote service. Will retry.")))
       (loop [c polling-interval]
         (when (and (pos? c)
                    (not @stop-atom))
