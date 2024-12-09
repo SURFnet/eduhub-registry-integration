@@ -59,7 +59,7 @@
 (defn guard-registry-config
   "Throw exception if `config` does not look like a valid configuration."
   [config]
-  (when-let [missing (seq (remove #(seq (config %)) ["endpoints" "applications" "version" "connections"]))]
+  (when-let [missing (seq (remove #(seq (config %)) ["version"]))]
     (throw (ex-info (str "Missing keys " (string/join ", " missing) " in registry response")
                     {:missing-keys missing})))
   config)
