@@ -83,7 +83,7 @@
      "passwordHash" "hash2",
      "passwordSalt" "salt2"}}])
 
-(def service-id service-id)
+(def service-id "service-id")
 
 (def connections
   [{"_id"         "connection-1",
