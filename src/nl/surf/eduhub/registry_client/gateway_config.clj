@@ -80,29 +80,34 @@
 (defn- ->acl
   [connections
    {id                    "_id"
-    {app-name "username"} "credentials"}]
+    {app-name "username"} "credentials"}
+   endpoint-keys-by-id]
   {:pre [id app-name connections]}
   {"app"       app-name
    "endpoints" (keep (fn [{application-id "application"
                            endpoint-id    "endpoint"
                            paths          "acl"}]
                        (when (= id application-id)
-                         {"endpoint" endpoint-id
+                         {"endpoint" (get endpoint-keys-by-id endpoint-id)
                           "paths"    (mapv normalize-path-params paths)}))
                      connections)})
 
 (defn ->acls
-  [applications connections]
-  (let [connections-by-app-id (group-by #(get % "application") connections)]
+  [applications endpoints connections]
+  (let [connections-by-app-id (group-by #(get % "application") connections)
+        endpoint-keys-by-id (reduce (fn [m {id "_id" k "key"}]
+                                      (assoc m id k))
+                                    {}
+                                    endpoints)]
     (mapv (fn [{:strs [_id] :as app}]
-            (->acl (get connections-by-app-id _id) app))
-           applications)))
+            (->acl (get connections-by-app-id _id) app endpoint-keys-by-id))
+          applications)))
 
 (defn ->service-endpoints
   [secrets-key endpoints]
   (->> endpoints
        (reduce (fn [m e]
-                 (assoc m (get e "_id")
+                 (assoc m (get e "key")
                         (->service-endpoint secrets-key e)))
                {})))
 
@@ -134,7 +139,7 @@
 
       (klist/update-in ["pipelines" gateway-pipeline "policies" "gatekeeper"]
                        klist/assoc-in ["action" "acls"]
-                       (->acls applications connections))
+                       (->acls applications endpoints connections))
 
       (klist/update-in ["pipelines" gateway-pipeline "policies" "gatekeeper"]
                        klist/assoc-in ["action" "apps"]
