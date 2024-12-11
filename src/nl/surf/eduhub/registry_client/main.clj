@@ -12,10 +12,10 @@
             [environ.core :refer [env]]
             [nl.jomco.envopts :as envopts]
             [nl.surf.eduhub.registry-client.gateway-config :as gateway-config]
+            [nl.surf.eduhub.registry-client.files :as files]
             [nl.surf.eduhub.registry-client.metrics :as metrics]
             [nl.surf.eduhub.registry-client.registry :as registry])
-  (:import (java.nio.file Files StandardCopyOption)
-           (java.net ConnectException)))
+  (:import (java.net ConnectException)))
 
 (def opt-specs
   {:gateway-config-file    ["Path to gateway config.yml"]
@@ -29,19 +29,8 @@
    :registry-service-id    ["Service ID for registry API"]
    :private-key-passphrase ["Passphrase for private key file"]
    :private-key-file       ["Path to private key file (pem)"]
+   :max-backup-age         ["Maximum age in days of backups to keep" :int :default 14]
    :polling-interval       ["Interval in seconds between registry polls" :int :default 30]})
-
-(def atomic-move-options
-  (into-array StandardCopyOption [StandardCopyOption/REPLACE_EXISTING StandardCopyOption/ATOMIC_MOVE]))
-
-(defn rename
-  [from to]
-  (Files/move (.toPath (io/file from)) (.toPath (io/file to))
-              atomic-move-options))
-
-(defn safe-name
-  [s]
-  (string/replace s #"[^a-zA-Z0-9]+" "_"))
 
 (defn poll
   [{:keys [gateway-config-file temp-config-file] :as config}]
@@ -58,20 +47,22 @@
                                                              current-gateway-config
                                                              reg-config)]
         ;; backup current configuration
-        (io/copy (io/file gateway-config-file)
-                 (io/file (str gateway-config-file "." (if current-config-version
-                                                         (safe-name current-config-version)
-                                                         "initial"))))
+        (files/make-backup gateway-config-file)
         ;; write new version to temp file]
         (gateway-config/write-gateway-config temp-config-file new-config)
         ;; atomically replace current file with new configuration
-        (rename temp-config-file gateway-config-file)))))
+        (files/rename temp-config-file gateway-config-file)))))
+
+(defn cleanup
+  [{:keys [gateway-config-file max-backup-age]}]
+  (files/remove-old-files (str gateway-config-file ".*") max-backup-age))
 
 (defn poll-loop
   [stop-atom {:keys [polling-interval] :as config}]
   (loop []
     (when-not @stop-atom
       (try (poll config)
+           (cleanup config)
            (catch ConnectException e
              (log/error e "Error connecting to remote service. Will retry.")))
       (loop [c polling-interval]
@@ -87,6 +78,8 @@
   (let [[opts errs] (envopts/opts cfg opt-specs)]
     (if errs
       (do (println (envopts/errs-description errs))
+          (println "\nAvailable options:")
+          (println (envopts/specs-description opt-specs))
           nil)
       opts)))
 
