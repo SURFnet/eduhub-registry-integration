@@ -23,6 +23,7 @@ CONEXT_TOKEN_URL        URL for conext token endpoint
 GATEWAY_CONFIG_FILE     Path to gateway config.yml
 GATEWAY_PIPELINE        Pipeline to update in gateway config
 GATEWAY_SECRETS_KEY     Secret to use for encoding proxy options
+MAX_BACKUP_AGE          Maximum age in days of backups to keep
 POLLING_INTERVAL        Interval in seconds between registry polls
 PRIVATE_KEY_FILE        Path to private key file (pem)
 PRIVATE_KEY_PASSPHRASE  Passphrase for private key file
