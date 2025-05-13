@@ -11,13 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
     - uses: actions/checkout@v4
-      
+
     - uses: actions/cache@v4
       with: { path: "~/.m2", key: "${{ runner.os }}-${{ hashFiles('deps.edn') }}-m2" }
-      
-    - name: Install clj runtime
-      run: .github/workflows/install-binaries.sh
+
+    - run: |
+        .github/workflows/install-binaries.sh
+        echo "${PWD}/bin" >> $GITHUB_PATH
+
       
     - name: run tests
-      run: bin/clojure -M:test
+      run: make check

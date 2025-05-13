@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2024 SURF B.V.
+# SPDX-FileCopyrightText: 2024, 2025 SURF B.V.
 # SPDX-FileContributor: Joost Diepenmaat
 # SPDX-FileContributor: Remco van 't Veer
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: lint test check clean
+.PHONY: lint test check clean watson
 
 default: target/eduhub-registry-client.jar
 
@@ -20,6 +20,9 @@ lint:
 
 test:
 	clojure -M:test
+
+watson:
+	clojure -M:watson scan -p deps.edn -f -s -w .watson.properties
 
 check: lint test
 
