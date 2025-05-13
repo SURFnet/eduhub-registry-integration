@@ -6,13 +6,11 @@
 
 (ns nl.surf.eduhub.registry-client.main
   (:gen-class)
-  (:require [clojure.java.io :as io]
-            [clojure.string :as string]
-            [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [nl.jomco.envopts :as envopts]
-            [nl.surf.eduhub.registry-client.gateway-config :as gateway-config]
             [nl.surf.eduhub.registry-client.files :as files]
+            [nl.surf.eduhub.registry-client.gateway-config :as gateway-config]
             [nl.surf.eduhub.registry-client.metrics :as metrics]
             [nl.surf.eduhub.registry-client.registry :as registry])
   (:import (java.net ConnectException)))
