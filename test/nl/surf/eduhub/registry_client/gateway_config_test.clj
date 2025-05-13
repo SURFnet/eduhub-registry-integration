@@ -47,10 +47,11 @@
     "ooapi"   {"version" "5"},
     "headers" [],
     "authentication"
-    {"clientId"     "dummy-client-id",
-     "tokenUrl"     "https://connect.test.surfconext.nl",
+    {"tokenUrl"     "https://connect.test.surfconext.nl",
      "type"         "oauth2-client-credentials",
-     "clientSecret" "dummy-password"}}])
+     "clientId"     "dummy-client-id",
+     "clientSecret" "dummy-password"
+     "scope"        "dummy-scope"}}])
 
 (deftest proxy-options
   (is
@@ -65,7 +66,8 @@
                          {"url"    "https://connect.test.surfconext.nl",
                           "params" {"grant_type"    "client_credentials",
                                     "client_id"     "dummy-client-id",
-                                    "client_secret" "dummy-password"}}}}}]
+                                    "client_secret" "dummy-password"
+                                    "scope"         "dummy-scope"}}}}}]
       (mapv sut/->proxy-options
             endpoints))))
 
@@ -193,7 +195,8 @@
                "params"
                {"grant_type"    "client_credentials",
                 "client_id"     "dummy-client-id",
-                "client_secret" "dummy-password"}}}}
+                "client_secret" "dummy-password"
+                "scope"         "dummy-scope"}}}}
             "proxyTimeout" 0}}}
 
          (->> endpoints
@@ -295,7 +298,8 @@
                 "params"
                 {"grant_type"    "client_credentials",
                  "client_id"     "dummy-client-id",
-                 "client_secret" "dummy-password"}}}}
+                 "client_secret" "dummy-password"
+                 "scope"         "dummy-scope"}}}}
              "proxyTimeout" 0}}},
           "policies"     ["log" "gatekeeper" "aggregation"],
           "pipelines"

@@ -37,14 +37,15 @@
   (assoc-in options ["headers" name] value))
 
 (defmethod authentication->proxy-options "oauth2-client-credentials"
-  [options {:strs [tokenUrl clientId clientSecret]}]
+  [options {:strs [tokenUrl clientId clientSecret scope]}]
   (assoc options "oauth2" ;; service?
          {"clientCredentials"
           {"tokenEndpoint"
            {"url"    tokenUrl
             "params" {"grant_type"    "client_credentials"
                       "client_id"     clientId
-                      "client_secret" clientSecret}}}}))
+                      "client_secret" clientSecret
+                      "scope"         scope}}}}))
 
 (defmethod authentication->proxy-options "none"
   [options _]
