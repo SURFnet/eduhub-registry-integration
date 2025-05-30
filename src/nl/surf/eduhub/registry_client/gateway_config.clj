@@ -42,10 +42,11 @@
          {"clientCredentials"
           {"tokenEndpoint"
            {"url"    tokenUrl
-            "params" {"grant_type"    "client_credentials"
-                      "client_id"     clientId
-                      "client_secret" clientSecret
-                      "scope"         scope}}}}))
+            "params" (cond-> {"grant_type"    "client_credentials"
+                              "client_id"     clientId
+                              "client_secret" clientSecret}
+                       (and scope (not (string/blank? scope)))
+                       (assoc "scope" scope))}}}))
 
 (defmethod authentication->proxy-options "none"
   [options _]
