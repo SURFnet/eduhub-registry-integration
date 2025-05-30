@@ -69,7 +69,15 @@
                                     "client_secret" "dummy-password"
                                     "scope"         "dummy-scope"}}}}}]
       (mapv sut/->proxy-options
-            endpoints))))
+            endpoints)))
+  (is
+   (= {"grant_type"    "client_credentials",
+       "client_id"     "dummy-client-id",
+       "client_secret" "dummy-password"}
+      (get-in (mapv sut/->proxy-options
+                    (assoc-in endpoints [3 "authentication" "scope"] ""))
+              [3 "oauth2" "clientCredentials" "tokenEndpoint" "params"]))
+   "scope remains unset"))
 
 (def applications
   [{"_id"   "application-1",
