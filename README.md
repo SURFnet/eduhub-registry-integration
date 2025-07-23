@@ -113,6 +113,6 @@ Example metrics:
 
 # Copying
 
-Copyright (C) 2024 SURF B.V.
+Copyright (C) 2024-2025 SURF B.V.
 
 [Apache-2.0](LICENSES/Apache-2.0.txt)
