@@ -29,8 +29,10 @@
   (let [base-path (as-path pattern)
         pattern (-> base-path .getFileName str)
         dir-path (-> base-path .toAbsolutePath .getParent)]
-    (->> (Files/newDirectoryStream dir-path pattern)
-         (filter #(Files/isRegularFile % no-follow-links)))))
+    (with-open [s (Files/newDirectoryStream dir-path pattern)]
+      ;; doall to ensure directory stream is fully read before closing
+      ;; note we can't use .filter since DirectoryStream is not a Stream
+      (doall (filter #(Files/isRegularFile % no-follow-links) s)))))
 
 (def ^:private atomic-move-options
   (into-array CopyOption
