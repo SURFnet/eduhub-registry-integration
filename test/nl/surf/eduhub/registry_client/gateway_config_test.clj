@@ -283,7 +283,8 @@
 
 (deftest update-gateway-config
   (is (= {"http"         {"port" 8080},
-          "apiEndpoints" {"api" {"paths" ["/"]}},
+          "apiEndpoints" {"api" {"paths" ["/"]}
+                          "version" {"paths" ["/version"]}},
           "serviceEndpoints"
           {"demo04.test.surfeduhub.nl"
            {"url"          "https://demo04.test.surfeduhub.nl",
@@ -309,7 +310,7 @@
                  "client_secret" "dummy-password"
                  "scope"         "dummy-scope"}}}}
              "proxyTimeout" 0}}},
-          "policies"     ["log" "gatekeeper" "aggregation"],
+          "policies"     ["log" "gatekeeper" "aggregation" "terminate" "response-transformer"],
           "pipelines"
           {"test"
            {"apiEndpoints" ["api"],
@@ -355,7 +356,15 @@
              {"aggregation"
               [{"action"
                 {"noEnvelopIfAnyHeaders" {"X-Validate-Response" "true"}}}]}],
-            "version"      "12345"}}}
+            "version"      "12345"}
+           "version"
+           {"apiEndpoints" ["version"],
+            "policies"
+            [{"response-transformer"
+              [{"action" {"headers" {"add" {"content-type" "'text/plain'"}}}}]}
+             {"terminate"
+              [{"action" {"statusCode" 200
+                          "message"    "12345"}}]}]}}}
          (->> (sut/update-gateway-config {:gateway-secrets-key secrets-key
                                           :gateway-pipeline    "test"}
                                         gateway-config
