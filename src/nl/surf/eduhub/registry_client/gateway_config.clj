@@ -127,11 +127,30 @@
   [{:keys [gateway-pipeline]} gateway-config]
   (klist/get-in gateway-config ["pipelines" gateway-pipeline "version"]))
 
+(defn- ensure-in-list [lst value]
+  (cond-> lst
+    (not (contains? (set lst) value))
+    (conj value)))
+
+(defn- add-version-endpoint [config version]
+  (-> config
+      (klist/assoc-in ["apiEndpoints" "version"] {"paths" ["/version"]})
+      (klist/update "policies" ensure-in-list "terminate")
+      (klist/update "policies" ensure-in-list "response-transformer")
+      (klist/assoc-in ["pipelines" "version"]
+                      {"apiEndpoints" ["version"]
+                       "policies"
+                       [{"response-transformer"
+                         [{"action" {"headers" {"add" {"content-type" "'text/plain'"}}}}]}
+                        {"terminate"
+                         [{"action" {"statusCode" 200
+                                     "message"    version}}]}]})))
+
 (defn update-gateway-config
   "Update the `gateway-config` with configuration from `registry-data`.
 
   Returns the updated gateway configuration."
-  [{:keys [gateway-secrets-key gateway-pipeline]}
+  [{:keys [gateway-secrets-key gateway-pipeline] }
    gateway-config
    {:strs [connections applications endpoints version]}]
   (-> gateway-config
@@ -145,4 +164,6 @@
 
       (klist/update-in ["pipelines" gateway-pipeline "policies" "gatekeeper"]
                        klist/assoc-in ["action" "apps"]
-                       (->apps applications))))
+                       (->apps applications))
+
+      (add-version-endpoint version)))
