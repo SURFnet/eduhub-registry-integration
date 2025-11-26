@@ -132,9 +132,16 @@
     (not (contains? (set lst) value))
     (conj value)))
 
+(defn- prepend-version-api-endpoint [endpoints]
+  (apply array-map ;; order is important here!
+         "version" {"paths" ["/version"]}
+         (->>  endpoints
+               (filter (fn [[k _]] (not= "version" k)))
+               (flatten))))
+
 (defn- add-version-endpoint [config version]
   (-> config
-      (klist/assoc-in ["apiEndpoints" "version"] {"paths" ["/version"]})
+      (klist/update-in ["apiEndpoints"] prepend-version-api-endpoint)
       (klist/update "policies" ensure-in-list "terminate")
       (klist/update "policies" ensure-in-list "response-transformer")
       (klist/assoc-in ["pipelines" "version"]
