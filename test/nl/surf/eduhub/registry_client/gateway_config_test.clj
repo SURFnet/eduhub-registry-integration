@@ -80,22 +80,28 @@
    "scope remains unset"))
 
 (def applications
-  [{"_id"   "application-1",
-    "name"  "RIO mapper",
-    "ooapi" {"version" "5"},
-    "credentials"
-    {"type"         "basic",
-     "username"     "app1",
-     "passwordHash" "hash1",
-     "passwordSalt" "salt1"}}
-   {"_id"   "application-2",
-    "name"  "edubroker",
-    "ooapi" {"version" "5"},
-    "credentials"
-    {"type"         "basic",
-     "username"     "app2",
-     "passwordHash" "hash2",
-     "passwordSalt" "salt2"}}])
+  [{"_id"         "application-1",
+    "name"        "RIO mapper",
+    "ooapi"       {"version" "5"},
+    "owner"       {"_id"       "owner-1"
+                   "name"      "RIO mapper"
+                   "type"      "Institution"
+                   "schacHome" "rio.mapper"}
+    "credentials" {"type"         "basic",
+                   "username"     "app1",
+                   "passwordHash" "hash1",
+                   "passwordSalt" "salt1"}}
+   {"_id"         "application-2",
+    "name"        "edubroker",
+    "ooapi"       {"version" "5"},
+    "owner"       {"_id"       "owner-2"
+                   "name"      "EDU broker"
+                   "type"      "Institution"
+                   "schacHome" "edu.broker"}
+    "credentials" {"type"         "basic",
+                   "username"     "app2",
+                   "passwordHash" "hash2",
+                   "passwordSalt" "salt2"}}])
 
 (def service-id "service-id")
 
@@ -215,10 +221,14 @@
 
   (testing "apps"
     (is (= {"app1"
-            {"passwordHash" "hash1",
-             "passwordSalt" "salt1"},
+            {"client_name"      "RIO mapper"
+             "client_schachome" "rio.mapper"
+             "passwordHash"     "hash1",
+             "passwordSalt"     "salt1"},
             "app2"
-            {"passwordHash" "hash2",
+            {"client_name"      "EDU broker"
+             "client_schachome" "edu.broker"
+             "passwordHash" "hash2",
              "passwordSalt" "salt2"},}
            (sut/->apps applications))))
 
@@ -351,8 +361,12 @@
                       "/associations/:associationId"
                       "/associations/external/me"]}]}],
                  "apps"
-                 {"app1" {"passwordHash" "hash1", "passwordSalt" "salt1"},
-                  "app2" {"passwordHash" "hash2", "passwordSalt" "salt2"}}}}]}
+                 {"app1" {"client_name"      "RIO mapper"
+                          "client_schachome" "rio.mapper"
+                          "passwordHash" "hash1", "passwordSalt" "salt1"},
+                  "app2" {"client_name"      "EDU broker"
+                          "client_schachome" "edu.broker"
+                          "passwordHash" "hash2", "passwordSalt" "salt2"}}}}]}
              {"aggregation"
               [{"action"
                 {"noEnvelopIfAnyHeaders" {"X-Validate-Response" "true"}}}]}],
