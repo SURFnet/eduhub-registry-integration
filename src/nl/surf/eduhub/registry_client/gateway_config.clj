@@ -116,10 +116,13 @@
 (defn ->apps
   [applications]
   (into {}
-        (map (fn [{:strs [credentials]}]
+        (map (fn [{:strs [credentials]
+                   {:strs [name schacHome]} "owner"}]
                [(get credentials "username")
                 (-> credentials
-                    (select-keys ["passwordHash" "passwordSalt"]))]))
+                    (select-keys ["passwordHash" "passwordSalt"])
+                    (assoc "client_name" name)
+                    (assoc "client_schachome" schacHome))]))
         applications))
 
 
