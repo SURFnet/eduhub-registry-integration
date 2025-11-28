@@ -257,7 +257,8 @@
 
 (def gateway-config
   {"http"         {"port" 8080},
-   "apiEndpoints" {"api" {"paths" ["/"]}},
+   "apiEndpoints" (array-map "api"       {"paths" ["/"]} ;; these entries are ordered!
+                             "not_found" {"paths" ["/*"]})
    "serviceEndpoints"
    [{"url" "https://surf.nl"}],
    "policies"     ["log" "gatekeeper" "aggregation"],
@@ -281,10 +282,18 @@
        [{"action"
          {"noEnvelopIfAnyHeaders" {"X-Validate-Response" "true"}}}]}]}}})
 
+(def result
+  (->> (sut/update-gateway-config {:gateway-secrets-key secrets-key
+                                   :gateway-pipeline    "test"}
+                                  gateway-config
+                                  registry-data)
+       (decode-proxy-options secrets-key)))
+
 (deftest update-gateway-config
   (is (= {"http"         {"port" 8080},
-          "apiEndpoints" {"api" {"paths" ["/"]}
-                          "version" {"paths" ["/version"]}},
+          "apiEndpoints" {"version"   {"paths" ["/version"]},
+                          "api"       {"paths" ["/"]},
+                          "not_found" {"paths" ["/*"]}},
           "serviceEndpoints"
           {"demo04.test.surfeduhub.nl"
            {"url"          "https://demo04.test.surfeduhub.nl",
@@ -365,8 +374,10 @@
              {"terminate"
               [{"action" {"statusCode" 200
                           "message"    "12345"}}]}]}}}
-         (->> (sut/update-gateway-config {:gateway-secrets-key secrets-key
-                                          :gateway-pipeline    "test"}
-                                        gateway-config
-                                        registry-data)
-              (decode-proxy-options secrets-key)))))
+         result))
+
+  (is (= [["version" {"paths" ["/version"]}]
+          ["api" {"paths" ["/"]}]
+          ["not_found" {"paths" ["/*"]}]]
+         (into [] (get result "apiEndpoints")))
+      "version endpoint goes first"))
