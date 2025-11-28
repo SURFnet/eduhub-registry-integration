@@ -226,7 +226,7 @@
              "passwordHash"     "hash1",
              "passwordSalt"     "salt1"},
             "app2"
-            {"client_name"      "EDU broker"
+            {"client_name"      "edubroker"
              "client_schachome" "edu.broker"
              "passwordHash" "hash2",
              "passwordSalt" "salt2"},}
@@ -373,7 +373,7 @@
                  {"app1" {"client_name"      "RIO mapper"
                           "client_schachome" "rio.mapper"
                           "passwordHash" "hash1", "passwordSalt" "salt1"},
-                  "app2" {"client_name"      "EDU broker"
+                  "app2" {"client_name"      "edubroker"
                           "client_schachome" "edu.broker"
                           "passwordHash" "hash2", "passwordSalt" "salt2"}}}}]}
              {"aggregation"

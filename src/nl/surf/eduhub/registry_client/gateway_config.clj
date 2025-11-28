@@ -116,8 +116,8 @@
 (defn ->apps
   [applications]
   (into {}
-        (map (fn [{:strs [credentials]
-                   {:strs [name schacHome]} "owner"}]
+        (map (fn [{:strs [name credentials]
+                   {:strs [schacHome]} "owner"}]
                [(get credentials "username")
                 (-> credentials
                     (select-keys ["passwordHash" "passwordSalt"])
