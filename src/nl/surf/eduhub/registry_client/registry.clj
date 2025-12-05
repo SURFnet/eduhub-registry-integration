@@ -9,26 +9,34 @@
             [clojure.string :as string]
             [nl.surf.eduhub.registry-client.registry.encryption :as encryption]))
 
+(def client-settings
+  {:timeout         30000 ; 30 seconds
+   :connect-timeout 30000 ; 30 seconds
+   :as              :json-string-keys
+   :accept          :json})
+
 (defn bearer-token
   [{:keys [conext-token-url conext-client-id conext-client-secret]}]
   {:pre [conext-token-url conext-client-id conext-client-secret]}
   ;; TODO cache token
-  (get-in (http/request {:url          conext-token-url
-                         :form-params {"grant_type"    "client_credentials"
-                                       "client_id"     conext-client-id
-                                       "client_secret" conext-client-secret}
-                         :accept       :json
-                         :as           :json-string-keys
-                         :method       :post})
+  (get-in (http/request (assoc client-settings
+                               :url          conext-token-url
+                               :form-params {"grant_type"    "client_credentials"
+                                             "client_id"     conext-client-id
+                                             "client_secret" conext-client-secret}
+                               :accept       :json
+                               :as           :json-string-keys
+                               :method       :post))
           [:body "access_token"]))
 
 (defn registry-request
   [{:keys [registry-base-url registry-service-id] :as config} path]
-  {:headers {"Authorization" (str "Bearer " (bearer-token config))}
-   :url     (str registry-base-url "/services/" registry-service-id path)
-   :accept  :json
-   :as      :json-string-keys
-   :method  :get})
+  (assoc client-settings
+         :headers {"Authorization" (str "Bearer " (bearer-token config))}
+         :url     (str registry-base-url "/services/" registry-service-id path)
+         :accept  :json
+         :as      :json-string-keys
+         :method  :get))
 
 (defn get-version
   [config]
