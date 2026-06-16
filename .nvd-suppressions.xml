@@ -16,4 +16,8 @@ SPDX-License-Identifier: Apache-2.0
     <notes>opentelemetry-semconv (transitive via clj-otel-api) provides semantic-convention constants only; no patched version available.</notes>
     <cve>CVE-2026-29181</cve>
   </suppress>
+  <suppress>
+    <notes>False positive, applies to go version of opentelemetry.</notes>
+    <cve>CVE-2026-24051</cve>
+  </suppress>
 </suppressions>
