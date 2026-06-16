@@ -1,4 +1,4 @@
-;;; SPDX-FileCopyrightText: 2024 SURF B.V.
+;;; SPDX-FileCopyrightText: 2024, 2026 SURF B.V.
 ;;; SPDX-FileContributor: Joost Diepenmaat
 ;;; SPDX-FileContributor: Remco van 't Veer
 ;;;
@@ -13,7 +13,8 @@
             [nl.surf.eduhub.registry-client.gateway-config :as gateway-config]
             [nl.surf.eduhub.registry-client.metrics :as metrics]
             [nl.surf.eduhub.registry-client.registry :as registry])
-  (:import (java.net ConnectException)))
+  (:import (java.net ConnectException)
+           (java.util.concurrent TimeoutException)))
 
 (def opt-specs
   {:gateway-config-file    ["Path to gateway config.yml"]
@@ -62,7 +63,9 @@
       (try (poll config)
            (cleanup config)
            (catch ConnectException e
-             (log/error e "Error connecting to remote service. Will retry.")))
+             (log/error e "Error connecting to remote service. Will retry."))
+           (catch TimeoutException e
+             (log/error e "Timeout connecting to remote service. Will retry.")))
       (loop [c polling-interval]
         (when (and (pos? c)
                    (not @stop-atom))

@@ -1,4 +1,4 @@
-;;; SPDX-FileCopyrightText: 2024 SURF B.V.
+;;; SPDX-FileCopyrightText: 2024, 2026 SURF B.V.
 ;;; SPDX-FileContributor: Joost Diepenmaat
 ;;; SPDX-FileContributor: Remco van 't Veer
 ;;;
@@ -18,11 +18,13 @@
         org.clojure/clojure                      {:mvn/version "1.12.0"}}
  :paths ["src"]
  :aliases
- {:test    {:extra-deps {lambdaisland/kaocha {:mvn/version "RELEASE"}}
+ {:test    {:extra-deps {lambdaisland/kaocha     {:mvn/version "RELEASE"}
+                         nl.jomco/with-resources {:mvn/version "0.1.2"}
+                         ring/ring               {:mvn/version "1.15.4"}}
             :main-opts  ["-m" "kaocha.runner"]}
 
-  :lint    {:extra-deps {clj-kondo/clj-kondo {:mvn/version "RELEASE"}}
-            :main-opts  ["-m" "clj-kondo.main" "--lint" "src" "test"]}
+  :clj-kondo {:extra-deps {clj-kondo/clj-kondo {:mvn/version "RELEASE"}}
+              :main-opts  ["-m" "clj-kondo.main"]}
 
   :package {:extra-paths ["classes"]}
   :uberjar {:replace-deps  {uberdeps/uberdeps {:mvn/version "RELEASE"}}

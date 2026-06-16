@@ -1,4 +1,4 @@
-;;; SPDX-FileCopyrightText: 2024 SURF B.V.
+;;; SPDX-FileCopyrightText: 2024, 2026 SURF B.V.
 ;;; SPDX-FileContributor: Joost Diepenmaat
 ;;; SPDX-FileContributor: Remco van 't Veer
 ;;;
@@ -7,7 +7,26 @@
 (ns nl.surf.eduhub.registry-client.registry
   (:require [clj-http.client :as http]
             [clojure.string :as string]
-            [nl.surf.eduhub.registry-client.registry.encryption :as encryption]))
+            [nl.surf.eduhub.registry-client.registry.encryption :as encryption])
+  (:import (java.util.concurrent TimeoutException TimeUnit)))
+
+(def ^:dynamic *request-timeout-msecs* 5000)
+
+(defn http-request
+  "Wrapper around http/request with timeout implemented.  Will raise
+  TimeoutException when request takes longer to complete than
+  *request-timeout-msecs* milliseconds."
+  [req]
+  (let [response (promise)
+        deliver  (partial deliver response)
+        future   (http/request (assoc req :async? true) deliver deliver)]
+    (try
+      (.get future *request-timeout-msecs* TimeUnit/MILLISECONDS)
+      @response
+
+      (catch TimeoutException e
+        (.cancel future true) ;; signal clj-http to cleanup
+        (throw e)))))
 
 (def client-settings
   {:timeout         30000 ; 30 seconds
@@ -19,7 +38,7 @@
   [{:keys [conext-token-url conext-client-id conext-client-secret]}]
   {:pre [conext-token-url conext-client-id conext-client-secret]}
   ;; TODO cache token
-  (get-in (http/request (assoc client-settings
+  (get-in (http-request (assoc client-settings
                                :url          conext-token-url
                                :form-params {"grant_type"    "client_credentials"
                                              "client_id"     conext-client-id
@@ -31,6 +50,7 @@
 
 (defn registry-request
   [{:keys [registry-base-url registry-service-id] :as config} path]
+  {:pre [registry-base-url registry-service-id]}
   (assoc client-settings
          :headers {"Authorization" (str "Bearer " (bearer-token config))}
          :url     (str registry-base-url "/services/" registry-service-id path)
@@ -40,7 +60,7 @@
 
 (defn get-version
   [config]
-  (get-in (http/request (registry-request config "/configversion"))
+  (get-in (http-request (registry-request config "/configversion"))
           [:body "version"]))
 
 (defn decrypt-endpoints
@@ -78,7 +98,7 @@
   (let [private-key (encryption/private-key config)]
     (-> config
         (registry-request (str "/configfile/" version))
-        http/request
+        http-request
         :body
         guard-registry-config
         (update "endpoints" decrypt-endpoints private-key)

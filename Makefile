@@ -15,8 +15,8 @@ classes/nl/surf/eduhub/registry_client/main.class: src/nl/surf/eduhub/registry_c
 target/eduhub-registry-client.jar: classes/nl/surf/eduhub/registry_client/main.class
 	clojure -M:uberjar --main-class nl.surf.eduhub.registry_client.main --target $@
 
-lint:
-	clojure -M:lint
+lint: .clj-kondo/imports
+	clojure -M:clj-kondo --lint src test
 
 test:
 	clojure -M:test
@@ -36,3 +36,7 @@ opentelemetry-javaagent.jar:
 
 docker-build: Dockerfile docker-compose.yml opentelemetry-javaagent.jar
 	docker-compose build
+
+.clj-kondo/imports:
+	clojure -M:clj-kondo --lint $$(clojure -Spath -T:test) \
+		--copy-configs --dependencies --skip-lint
