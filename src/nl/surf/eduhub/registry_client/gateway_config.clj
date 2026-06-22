@@ -86,12 +86,15 @@
    endpoint-keys-by-id]
   {:pre [id app-name connections]}
   {"app"       app-name
-   "endpoints" (keep (fn [{application-id "application"
-                           endpoint-id    "endpoint"
-                           paths          "acl"}]
+   "endpoints" (keep (fn [{application-id      "application"
+                           endpoint-id         "endpoint"
+                           {version "version"} "ooapi"
+                           paths               "acl"}]
                        (when (= id application-id)
-                         {"endpoint" (get endpoint-keys-by-id endpoint-id)
-                          "paths"    (mapv normalize-path-params paths)}))
+                         (cond-> {"endpoint" (get endpoint-keys-by-id endpoint-id)
+                                  "paths"    (mapv normalize-path-params paths)}
+                           version ;; version is introduced for the oeapi v6 integration
+                           (assoc "version" version))))
                      connections)})
 
 (defn ->acls
