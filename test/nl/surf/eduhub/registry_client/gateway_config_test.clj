@@ -18,6 +18,10 @@
     "url"            "https://demo04.test.surfeduhub.nl",
     "key"            "demo04.test.surfeduhub.nl",
     "timeout"        10,
+    ;; for endpoints and applications, the `"ooapi" {"version" ".."}`
+    ;; entry is renamed to `"ooapi" {"versions" [ .. ]}` in newer
+    ;; registry deployments, but we ignore that information and only
+    ;; use "version" information from the "connection" maps
     "ooapi"          {"version" "5"},
     "headers"        [],
     "authentication" {"type" "none"}}
@@ -82,7 +86,7 @@
 (def applications
   [{"_id"         "application-1",
     "name"        "RIO mapper",
-    "ooapi"       {"version" "5"},
+    "ooapi"       {"versions" ["5"]},
     "owner"       {"_id"       "owner-1"
                    "name"      "RIO mapper"
                    "type"      "Institution"

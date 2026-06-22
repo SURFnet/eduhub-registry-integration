@@ -44,25 +44,20 @@
           [:body "version"]))
 
 (defn decrypt-endpoints
-  [endpoints private-key]
-  (->> endpoints
-       (mapv (fn [endpoint]
-               ;; Maybe use `(cond endpoint-> `?
-               (if (map? (get endpoint "authentication")) ;; FIXME: When no authentication is provided, this is a vector!
-                 (update endpoint "authentication" encryption/merge-encrypted-data private-key)
-                 endpoint)))))
+  [endpoint private-key]
+  (if (map? (get endpoint "authentication")) ;; FIXME: When no authentication is provided, this is a vector!
+    (update endpoint "authentication" encryption/merge-encrypted-data private-key)
+    endpoint))
 
 (defn fixup-credentials
   "In older versions of the registry, application credentials are vectors. This ensures
   credentials are always maps."
-  [applications]
-  (map (fn [application]
-         (update application "credentials" (fn [c]
-                                             ;; can also be empty vectors
-                                             (if (vector? c)
-                                               (first c)
-                                               c))))
-       applications))
+  [application]
+  (update application "credentials" (fn [c]
+                                      ;; can also be empty vectors
+                                      (if (vector? c)
+                                        (first c)
+                                        c))))
 
 (defn guard-registry-config
   "Throw exception if `config` does not look like a valid configuration."
@@ -71,6 +66,13 @@
     (throw (ex-info (str "Missing keys " (string/join ", " missing) " in registry response")
                     {:missing-keys missing})))
   config)
+
+(defn- mapv-in
+  [m ks f & args]
+  (update-in m ks (fn [coll]
+                    (mapv (fn [item]
+                            (apply f item args))
+                     coll))))
 
 (defn get-config
   "Fetch decrypted configuration with given version from the registry."
@@ -81,5 +83,5 @@
         http/request
         :body
         guard-registry-config
-        (update "endpoints" decrypt-endpoints private-key)
-        (update "applications" fixup-credentials))))
+        (mapv-in ["endpoints"] decrypt-endpoints private-key)
+        (mapv-in ["applications"] fixup-credentials))))
