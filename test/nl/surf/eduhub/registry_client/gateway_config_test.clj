@@ -15,8 +15,8 @@
 
 (def endpoints
   [{"_id"            "endpoint-1",
-    "url"            "https://demo04.test.surfeduhub.nl",
-    "key"            "demo04.test.surfeduhub.nl",
+    "url"            "https://endpoint-1.test.surfeduhub.nl",
+    "key"            "endpoint-1.test.surfeduhub.nl",
     "timeout"        10,
     ;; for endpoints and applications, the `"ooapi" {"version" ".."}`
     ;; entry is renamed to `"ooapi" {"versions" [ .. ]}` in newer
@@ -26,8 +26,8 @@
     "headers"        [],
     "authentication" {"type" "none"}}
    {"_id"     "endpoint-2",
-    "url"     "https://demo06.test.surfeduhub.nl",
-    "key"     "demo06.test.surfeduhub.nl",
+    "url"     "https://endpoint-2.test.surfeduhub.nl",
+    "key"     "endpoint-2.test.surfeduhub.nl",
     "timeout" 1000,
     "ooapi"   {"version" "5"},
     "headers" [],
@@ -36,8 +36,8 @@
      "type"     "basic",
      "password" "demo"}}
    {"_id"            "endpoint-3",
-    "url"            "https://demo05.test.surfeduhub.nl",
-    "key"            "demo05.test.surfeduhub.nl",
+    "url"            "https://endpoint-3.test.surfeduhub.nl",
+    "key"            "endpoint-3.test.surfeduhub.nl",
     "timeout"        0,
     "ooapi"          {"version" "5"},
     "headers"        [],
@@ -116,7 +116,8 @@
     "application" "application-1",
     "name"        1,
     "createdAt"   "2024-02-08T13:32:04.927Z",
-    "acl"
+    "ooapi"       {"version" "5"}
+    "acl"    
     ["/courses/{courseId}"
      "/courses/{courseId}/offerings"
      "/education-specifications/{educationSpecificationId}"
@@ -139,12 +140,12 @@
     "application" "application-1",
     "name"        3,
     "createdAt"   "2024-02-08T14:07:45.574Z",
+    "ooapi"       {"version" "6"}
     "acl"
     ["/courses/{courseId}"
      "/courses/{courseId}/offerings"
      "/education-specifications/{educationSpecificationId}"
-     "/programs/{programId}"
-     "/programs/{programId}/offerings"]}
+     "/programmes/{programmeId}"]}
    {"_id"         "connection-4",
     "service"     service-id,
     "endpoint"    "endpoint-3",
@@ -192,15 +193,15 @@
 (deftest conversions
   (testing "serviceEndpoints"
     (is (=
-         {"demo04.test.surfeduhub.nl"
-          {"url"          "https://demo04.test.surfeduhub.nl",
+         {"endpoint-1.test.surfeduhub.nl"
+          {"url"          "https://endpoint-1.test.surfeduhub.nl",
            "proxyOptions" {"proxyTimeout" 10}},
-          "demo06.test.surfeduhub.nl"
-          {"url"          "https://demo06.test.surfeduhub.nl",
+          "endpoint-2.test.surfeduhub.nl"
+          {"url"          "https://endpoint-2.test.surfeduhub.nl",
            "proxyOptions" {"auth"         "demo:demo"
                            "proxyTimeout" 1000}},
-          "demo05.test.surfeduhub.nl"
-          {"url"          "https://demo05.test.surfeduhub.nl",
+          "endpoint-3.test.surfeduhub.nl"
+          {"url"          "https://endpoint-3.test.surfeduhub.nl",
            "proxyOptions" {"headers"      {"Authorisation" "Bearer 12345"}
                            "proxyTimeout" 0}},
           "hotmail.surf.nl"
@@ -232,36 +233,37 @@
             "app2"
             {"client_name"      "edubroker"
              "client_schachome" "edu.broker"
-             "passwordHash" "hash2",
-             "passwordSalt" "salt2"},}
+             "passwordHash"     "hash2",
+             "passwordSalt"     "salt2"},}
            (sut/->apps applications))))
 
   (testing "acls"
     (is (= [{"app" "app1",
              "endpoints"
-             [{"endpoint" "demo04.test.surfeduhub.nl",
+             [{"endpoint" "endpoint-1.test.surfeduhub.nl",
+               "version"  "5"
                "paths"
                ["/courses/:courseId"
                 "/courses/:courseId/offerings"
                 "/education-specifications/:educationSpecificationId"
                 "/programs/:programId"
                 "/programs/:programId/offerings"]}
-              {"endpoint" "demo06.test.surfeduhub.nl",
+              {"endpoint" "endpoint-2.test.surfeduhub.nl",
+               "version"  "6"
                "paths"
                ["/courses/:courseId"
                 "/courses/:courseId/offerings"
                 "/education-specifications/:educationSpecificationId"
-                "/programs/:programId"
-                "/programs/:programId/offerings"]}]}
+                "/programmes/:programmeId"]}]}
             {"app" "app2",
              "endpoints"
-             [{"endpoint" "demo04.test.surfeduhub.nl",
+             [{"endpoint" "endpoint-1.test.surfeduhub.nl",
                "paths"
                ["/persons"
                 "/persons/:personId"
                 "/associations/:associationId"
                 "/associations/external/me"]}
-              {"endpoint" "demo05.test.surfeduhub.nl",
+              {"endpoint" "endpoint-3.test.surfeduhub.nl",
                "paths"
                ["/persons"
                 "/persons/:personId"
@@ -309,15 +311,15 @@
                           "api"       {"paths" ["/"]},
                           "not_found" {"paths" ["/*"]}},
           "serviceEndpoints"
-          {"demo04.test.surfeduhub.nl"
-           {"url"          "https://demo04.test.surfeduhub.nl",
+          {"endpoint-1.test.surfeduhub.nl"
+           {"url"          "https://endpoint-1.test.surfeduhub.nl",
             "proxyOptions" {"proxyTimeout" 10}},
-           "demo05.test.surfeduhub.nl"
-           {"url"          "https://demo05.test.surfeduhub.nl",
+           "endpoint-3.test.surfeduhub.nl"
+           {"url"          "https://endpoint-3.test.surfeduhub.nl",
             "proxyOptions" {"headers"      {"Authorisation" "Bearer 12345"}
                             "proxyTimeout" 0}},
-           "demo06.test.surfeduhub.nl"
-           {"url"          "https://demo06.test.surfeduhub.nl",
+           "endpoint-2.test.surfeduhub.nl"
+           {"url"          "https://endpoint-2.test.surfeduhub.nl",
             "proxyOptions" {"auth"         "demo:demo"
                             "proxyTimeout" 1000}},
            "hotmail.surf.nl"
@@ -345,29 +347,30 @@
                 {"acls"
                  [{"app" "app1",
                    "endpoints"
-                   [{"endpoint" "demo04.test.surfeduhub.nl",
+                   [{"endpoint" "endpoint-1.test.surfeduhub.nl",
+                     "version"  "5",
                      "paths"
                      ["/courses/:courseId"
                       "/courses/:courseId/offerings"
                       "/education-specifications/:educationSpecificationId"
                       "/programs/:programId"
                       "/programs/:programId/offerings"]}
-                    {"endpoint" "demo06.test.surfeduhub.nl",
+                    {"endpoint" "endpoint-2.test.surfeduhub.nl",
+                     "version"  "6"
                      "paths"
                      ["/courses/:courseId"
                       "/courses/:courseId/offerings"
                       "/education-specifications/:educationSpecificationId"
-                      "/programs/:programId"
-                      "/programs/:programId/offerings"]}]}
+                      "/programmes/:programmeId"]}]}
                   {"app" "app2",
                    "endpoints"
-                   [{"endpoint" "demo04.test.surfeduhub.nl",
+                   [{"endpoint" "endpoint-1.test.surfeduhub.nl",
                      "paths"
                      ["/persons"
                       "/persons/:personId"
                       "/associations/:associationId"
                       "/associations/external/me"]}
-                    {"endpoint" "demo05.test.surfeduhub.nl",
+                    {"endpoint" "endpoint-3.test.surfeduhub.nl",
                      "paths"
                      ["/persons"
                       "/persons/:personId"
@@ -376,10 +379,10 @@
                  "apps"
                  {"app1" {"client_name"      "RIO mapper"
                           "client_schachome" "rio.mapper"
-                          "passwordHash" "hash1", "passwordSalt" "salt1"},
+                          "passwordHash"     "hash1", "passwordSalt" "salt1"},
                   "app2" {"client_name"      "edubroker"
                           "client_schachome" "edu.broker"
-                          "passwordHash" "hash2", "passwordSalt" "salt2"}}}}]}
+                          "passwordHash"     "hash2", "passwordSalt" "salt2"}}}}]}
              {"aggregation"
               [{"action"
                 {"noEnvelopIfAnyHeaders" {"X-Validate-Response" "true"}}}]}],
