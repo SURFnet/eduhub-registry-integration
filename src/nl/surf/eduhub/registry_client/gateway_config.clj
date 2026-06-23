@@ -93,7 +93,13 @@
                        (when (= id application-id)
                          (cond-> {"endpoint" (get endpoint-keys-by-id endpoint-id)
                                   "paths"    (mapv normalize-path-params paths)}
-                           version ;; version is introduced for the oeapi v6 integration
+                           ;; version is introduced for the oeapi v6
+                           ;; integration.  if it's not present in the
+                           ;; registry, leave it out
+                           ;;
+                           ;; the gateway can deal with missing
+                           ;; versions
+                           version 
                            (assoc "version" version))))
                      connections)})
 
@@ -121,6 +127,8 @@
   (into {}
         (map (fn [{:strs [name credentials]
                    {:strs [schacHome]} "owner"}]
+               (assert (or (nil? credentials) (map? credentials))
+                       "invalid credentials format from registry")
                [(get credentials "username")
                 (-> credentials
                     (select-keys ["passwordHash" "passwordSalt"])

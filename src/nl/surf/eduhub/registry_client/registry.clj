@@ -63,21 +63,11 @@
   (get-in (http-request (registry-request config "/configversion"))
           [:body "version"]))
 
-(defn decrypt-endpoints
+(defn decrypt-endpoint
   [endpoint private-key]
   (if (map? (get endpoint "authentication")) ;; FIXME: When no authentication is provided, this is a vector!
     (update endpoint "authentication" encryption/merge-encrypted-data private-key)
     endpoint))
-
-(defn fixup-credentials
-  "In older versions of the registry, application credentials are vectors. This ensures
-  credentials are always maps."
-  [application]
-  (update application "credentials" (fn [c]
-                                      ;; can also be empty vectors
-                                      (if (vector? c)
-                                        (first c)
-                                        c))))
 
 (defn guard-registry-config
   "Throw exception if `config` does not look like a valid configuration."
@@ -92,7 +82,7 @@
   (update-in m ks (fn [coll]
                     (mapv (fn [item]
                             (apply f item args))
-                     coll))))
+                          coll))))
 
 (defn get-config
   "Fetch decrypted configuration with given version from the registry."
@@ -103,5 +93,4 @@
         http-request
         :body
         guard-registry-config
-        (mapv-in ["endpoints"] decrypt-endpoints private-key)
-        (mapv-in ["applications"] fixup-credentials))))
+        (mapv-in ["endpoints"] decrypt-endpoint private-key))))
