@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name: Run tests
-on: push
+
+on: workflow_call
 
 jobs:
   test:
