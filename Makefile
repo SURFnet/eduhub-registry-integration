@@ -29,6 +29,9 @@ watson:
 
 check: lint test
 
+outdated:
+	clojure -M:antq
+
 clean:
 	rm -rf classes target
 
