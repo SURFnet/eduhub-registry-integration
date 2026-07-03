@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name: Run tests
-on: push
+
+on: workflow_call
 
 jobs:
   test:
@@ -17,10 +18,17 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
-    - uses: actions/cache@v5
+    - uses: actions/cache@v6
       with: { path: "~/.m2", key: "${{ runner.os }}-${{ hashFiles('deps.edn') }}-m2" }
+
+    - uses: actions/cache@v6
+      with:
+        key: "clojure-${{ runner.os }}-${{ hashFiles('.github/workflows/install-binaries.sh') }}"
+        path: |
+          ./bin
+          ./lib
 
     - run: |
         .github/workflows/install-binaries.sh

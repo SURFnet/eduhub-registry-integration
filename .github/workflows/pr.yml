@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 SURF B.V.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Run checks for PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  nvd:
+    uses: ./.github/workflows/nvd.yml
+
+  check:
+    uses: ./.github/workflows/test.yml
+
+  outdated:
+    uses: ./.github/workflows/outdated.yml

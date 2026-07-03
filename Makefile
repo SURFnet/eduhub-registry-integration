@@ -21,10 +21,16 @@ lint: .clj-kondo/imports
 test:
 	clojure -M:test
 
+export CLJ_WATSON_NVD_API_KEY=dummy # note: required but not used
+export CLJ_WATSON_NVD_API_DATAFEED_URL=https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz
+
 watson:
 	clojure -M:watson scan -p deps.edn -f -s -w .watson.properties
 
 check: lint test
+
+outdated:
+	clojure -M:antq
 
 clean:
 	rm -rf classes target
