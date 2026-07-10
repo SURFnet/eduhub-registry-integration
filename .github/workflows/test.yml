@@ -12,28 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-    - uses: actions/setup-java@v5
-      with:
-        distribution: 'temurin'
-        java-version: '21'
-
     - uses: actions/checkout@v7
-
-    - uses: actions/cache@v6
-      with: { path: "~/.m2", key: "${{ runner.os }}-${{ hashFiles('deps.edn') }}-m2" }
-
-    - uses: actions/cache@v6
-      with:
-        key: "clojure-${{ runner.os }}-${{ hashFiles('.github/workflows/install-binaries.sh') }}"
-        path: |
-          ./bin
-          ./lib
-
-    - run: |
-        .github/workflows/install-binaries.sh
-        echo "${PWD}/bin" >> $GITHUB_PATH
-
+    - uses: jomco/clojure-action@v0
+      with: { m2-cache-key: m2-test }
 
     - name: run tests
       run: make check
