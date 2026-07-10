@@ -17,6 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
     - uses: jomco/clojure-action@v0
+      with: { m2-cache-key: m2-nvd }
 
     - name: Check clojure dependencies with NVD
       run: make watson
