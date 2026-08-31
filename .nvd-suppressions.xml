@@ -12,6 +12,10 @@ SPDX-License-Identifier: Apache-2.0
     <cve>CVE-2026-24051</cve>
   </suppress>
   <suppress>
+    <notes>False positive, applies to js version of opentelemetry.</notes>
+    <cve>CVE-2026-54285</cve>
+  </suppress>
+  <suppress>
     <notes>DoS vulnerability on outgoing HTTP request.  Impact very low because HTTP only made to trusted endpoints.</notes>
     <cve>CVE-2026-54399</cve>
     <cve>CVE-2026-54428</cve>
