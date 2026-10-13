@@ -58,10 +58,18 @@
          :as      :json-string-keys
          :method  :get))
 
+(defn- guard-http-success
+  [res]
+  (when (instance? Exception res) (throw res))
+  res)
+
 (defn get-version
   [config]
-  (get-in (http-request (registry-request config "/configversion"))
-          [:body "version"]))
+  (-> config
+      (registry-request "/configversion")
+      (http-request)
+      (guard-http-success)
+      (get-in [:body "version"])))
 
 (defn decrypt-endpoint
   [endpoint private-key]
@@ -90,7 +98,8 @@
   (let [private-key (encryption/private-key config)]
     (-> config
         (registry-request (str "/configfile/" version))
-        http-request
+        (http-request)
+        (guard-http-success)
         :body
-        guard-registry-config
+        (guard-registry-config)
         (mapv-in ["endpoints"] decrypt-endpoint private-key))))
