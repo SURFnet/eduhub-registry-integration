@@ -6,10 +6,12 @@
 
 (ns nl.surf.eduhub.registry-client.registry-test
   (:require [clojure.test :refer [deftest is testing]]
+            [nl.jomco.http-status-codes :as http-status]
             [nl.jomco.resources :refer [Resource with-resources]]
             [nl.surf.eduhub.registry-client.registry :as sut]
             [ring.adapter.jetty :refer [run-jetty]])
-  (:import (java.util.concurrent TimeoutException)))
+  (:import (java.util.concurrent TimeoutException)
+           clojure.lang.ExceptionInfo))
 
 ;; dummy serves both conext and registry
 (def dummy-host "localhost")
@@ -25,12 +27,10 @@
   org.eclipse.jetty.server.Server
   (close [server] (.stop server)))
 
-(def http-ok 200)
-
 (defn start-dummy [handler]
   (run-jetty (fn [{:keys [uri] :as req}]
                (or (when (= "/token" uri)
-                     {:status  http-ok
+                     {:status  http-status/ok
                       :headers {"content-type" "application/json"}
                       :body    "{\"access_token\":\"dummy\"}"})
                    (handler req)))
@@ -39,7 +39,7 @@
               :join? false}))
 
 (deftest get-version
-  (with-resources [_ (-> {:status  http-ok
+  (with-resources [_ (-> {:status  http-status/ok
                           :headers {"content-type" "application/json"}
                           :body    "{\"version\":3.1415}"}
                          constantly
@@ -50,6 +50,13 @@
     (binding [sut/*request-timeout-msecs* 10]
       (with-resources [_ (start-dummy (fn [_]
                                         (Thread/sleep (+ 1 sut/*request-timeout-msecs*))
-                                        {:status http-ok}))]
+                                        {:status http-status/ok}))]
         (is (thrown? TimeoutException
-                     (sut/get-version dummy-config)))))))
+                     (sut/get-version dummy-config))))))
+
+  (testing "with bad token"
+    (with-resources [_ (-> {:status http-status/forbidden}
+                           constantly
+                           start-dummy)]
+      (is (thrown? ExceptionInfo
+                   (sut/get-version dummy-config))))))
