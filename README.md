@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2024 SURF B.V.
+SPDX-FileCopyrightText: 2024, 2026 SURF B.V.
 SPDX-FileContributor: Joost Diepenmaat
 SPDX-FileContributor: Remco van 't Veer
 
@@ -30,6 +30,7 @@ PRIVATE_KEY_PASSPHRASE  Passphrase for private key file
 REGISTRY_BASE_URL       Base URL for registry API
 REGISTRY_SERVICE_ID     Service ID for registry API
 TEMP_CONFIG_FILE        Path to use for temporary config.yml
+SERVER_PORT             Portnumber to listen for HTTP health checks
 ```
 
 ## Metrics
@@ -61,6 +62,10 @@ export OTEL_TRACES_EXPORTER=none
 
 Logs are printed directly to STDOUT and can be forwarded to another
 service if needed.
+
+## Health checks
+
+The application listens for HTTP request at `SERVER_PORT` and will respond to a `GET /health` request with a `200 OK` when it is listening for configuration changes, `503 Service Unavailable` when the listener failed to start, or the endpoint will not be reachable when the application did not startup properly.
 
 ## Development stack
 

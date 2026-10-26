@@ -18,7 +18,7 @@ target/eduhub-registry-client.jar: classes/nl/surf/eduhub/registry_client/main.c
 lint: .clj-kondo/imports
 	clojure -M:clj-kondo --lint src test
 
-test:
+test: test/key.pem
 	clojure -M:test
 
 export CLJ_WATSON_NVD_API_KEY=dummy # note: required but not used
@@ -44,5 +44,8 @@ docker-build: Dockerfile docker-compose.yml opentelemetry-javaagent.jar
 	docker-compose build
 
 .clj-kondo/imports:
-	clojure -M:clj-kondo --lint $$(clojure -Spath -T:test) \
+	clojure -M:clj-kondo --lint $$(clojure -Spath) \
 		--copy-configs --dependencies --skip-lint
+
+test/key.pem:
+	openssl genrsa -out $@ 4096

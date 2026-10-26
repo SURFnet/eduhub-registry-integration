@@ -9,3 +9,4 @@ classes
 target
 /opentelemetry-javaagent.jar
 /.envrc
+/test/key.pem
