@@ -132,7 +132,7 @@
         (eventually-is (= http-status/ok status)))
 
       ;; kill poller
-      (.interrupt (-> system :poller first))
+      (.interrupt (:poller system))
 
       (let [{:keys [status]} (http/request req)]
         (eventually-is (= http-status/service-unavailable status))))))
