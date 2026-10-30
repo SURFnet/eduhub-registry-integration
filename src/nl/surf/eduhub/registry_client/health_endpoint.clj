@@ -21,7 +21,7 @@
       {:status status
        :body   (http-status/->description status)})))
 
-(defn mk-health-endpoint [{:keys [server-host server-port]} [poller]]
+(defn mk-health-endpoint [{:keys [server-host server-port]} poller]
   (run-jetty (mk-handler poller)
              {:host  server-host
               :port  server-port

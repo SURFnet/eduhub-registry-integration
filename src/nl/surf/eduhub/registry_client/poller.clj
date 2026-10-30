@@ -6,7 +6,6 @@
 
 (ns nl.surf.eduhub.registry-client.poller
   (:require [clojure.tools.logging :as log]
-            [nl.jomco.resources :as resources]
             [nl.surf.eduhub.registry-client.files :as files]
             [nl.surf.eduhub.registry-client.gateway-config :as gateway-config]
             [nl.surf.eduhub.registry-client.metrics :as metrics]
@@ -53,7 +52,9 @@
       (Thread/sleep (* 1000 polling-interval))
       (recur))
     (catch InterruptedException _
-      (log/info "Shutting down"))))
+      (log/info "Shutting down"))
+    (catch Exception e
+      (log/fatal e "Unexpected exception in poller loop"))))
 
 (defn mk-registry-config-poller
   "Make and start a poller for the registry configuration.  Returns
@@ -61,12 +62,5 @@
   configuration.  This function is a closeable resource which will
   stop the poller when closed."
   [config]
-  (let [worker (Thread. #(poll-loop config) "registry-config-poller")]
-    (.start worker)
-
-    (resources/closeable
-     [worker] ;; wrap in vector to allow adding close method
-     (fn close-poller [_]
-       (.interrupt worker)
-       (.join worker)
-       (log/info "Stopped registry-config-poller")))))
+  (doto (Thread. #(poll-loop config) "registry-config-poller")
+    (.start)))

@@ -8,6 +8,7 @@
   (:gen-class)
   (:require [environ.core :refer [env]]
             [nl.jomco.envopts :as envopts]
+            [nl.jomco.resources :refer [with-resources]]
             [nl.surf.eduhub.registry-client.system :as system]))
 
 (def opt-specs
@@ -45,5 +46,6 @@
 (defn -main
   [& _]
   (if-let [config (mk-config env)]
-    (system/run-system config)
+    (with-resources [system (system/run-system config)]
+      (.join (:poller system)))
     (System/exit 1)))
